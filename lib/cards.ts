@@ -58,17 +58,13 @@ export interface CitiSettings extends BasePerCardSettings {
   tyValuePerPointAED: number // default 500/15000 ≈ 0.0333
 }
 
-export interface PerCardSettings {
+export interface CardSettings {
   ADCB_365: AdcbSettings
   EI_SWITCH: EiSwitchSettings
   AJMAN_ULTRACASH: AjmanSettings
   SIB_CASHBACK: SibSettings
   DIB_WALAA: DibSettings
   CITI_PREMIER: CitiSettings
-}
-
-export interface CardSettings {
-  cards: PerCardSettings
 }
 
 export interface CardResult {
@@ -112,33 +108,31 @@ export const CATEGORY_LABELS: Record<PurchaseCategory, string> = {
 }
 
 export const DEFAULT_SETTINGS: CardSettings = {
-  cards: {
-    ADCB_365: {
-      enabled: true,
-      minSpendMet: true,
-    },
-    EI_SWITCH: {
-      enabled: true,
-      plan: "lifestyle",
-      minSpendMet: true,
-    },
-    AJMAN_ULTRACASH: {
-      enabled: true,
-      activeCategories: ["fuel", "supermarket"],
-    },
-    SIB_CASHBACK: {
-      enabled: true,
-      apply10OnFuelWallet: false,
-    },
-    DIB_WALAA: {
-      enabled: true,
-      walaaValuePerPointAED: 0.005,
-    },
-    CITI_PREMIER: {
-      enabled: true,
-      aedPerUsd: 3.67,
-      tyValuePerPointAED: 500 / 15000, // ~0.0333
-    },
+  ADCB_365: {
+    enabled: true,
+    minSpendMet: true,
+  },
+  EI_SWITCH: {
+    enabled: true,
+    plan: "lifestyle",
+    minSpendMet: true,
+  },
+  AJMAN_ULTRACASH: {
+    enabled: true,
+    activeCategories: ["fuel", "supermarket"],
+  },
+  SIB_CASHBACK: {
+    enabled: true,
+    apply10OnFuelWallet: false,
+  },
+  DIB_WALAA: {
+    enabled: true,
+    walaaValuePerPointAED: 0.005,
+  },
+  CITI_PREMIER: {
+    enabled: true,
+    aedPerUsd: 3.67,
+    tyValuePerPointAED: 500 / 15000, // ~0.0333
   },
 }
 
@@ -504,12 +498,12 @@ export function computeBestCard(purchase: PurchaseInput, settings: CardSettings)
 
   const results: CardResult[] = []
 
-  results.push(calcAdcb365(purchase, settings.cards.ADCB_365))
-  results.push(calcEiSwitch(purchase, settings.cards.EI_SWITCH))
-  results.push(calcAjmanUltracash(purchase, settings.cards.AJMAN_ULTRACASH))
-  results.push(calcSibCashback(purchase, settings.cards.SIB_CASHBACK))
-  results.push(calcDibWalaa(purchase, settings.cards.DIB_WALAA))
-  results.push(calcCitiPremier(purchase, settings.cards.CITI_PREMIER))
+  results.push(calcAdcb365(purchase, settings.ADCB_365))
+  results.push(calcEiSwitch(purchase, settings.EI_SWITCH))
+  results.push(calcAjmanUltracash(purchase, settings.AJMAN_ULTRACASH))
+  results.push(calcSibCashback(purchase, settings.SIB_CASHBACK))
+  results.push(calcDibWalaa(purchase, settings.DIB_WALAA))
+  results.push(calcCitiPremier(purchase, settings.CITI_PREMIER))
 
   results.sort((a, b) => b.effectiveRate - a.effectiveRate)
 

@@ -35,7 +35,7 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
   }, [settings])
 
   const handleAjmanCategoryToggle = (cat: AjmanCategory) => {
-    const current = draft.cards.AJMAN_ULTRACASH.activeCategories
+    const current = draft.AJMAN_ULTRACASH.activeCategories
     let updated: AjmanCategory[]
 
     if (current.includes(cat)) {
@@ -46,18 +46,15 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
 
     setDraft({
       ...draft,
-      cards: {
-        ...draft.cards,
-        AJMAN_ULTRACASH: {
-          ...draft.cards.AJMAN_ULTRACASH,
-          activeCategories: updated,
-        },
+      AJMAN_ULTRACASH: {
+        ...draft.AJMAN_ULTRACASH,
+        activeCategories: updated,
       },
     })
   }
 
   const handleSave = () => {
-    if (draft.cards.AJMAN_ULTRACASH.activeCategories.length !== 2) {
+    if (draft.AJMAN_ULTRACASH.activeCategories.length !== 2) {
       setAjmanError("Please select exactly 2 categories for Ajman ULTRACASH")
       return
     }
@@ -85,11 +82,11 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{CARD_NAMES.ADCB_365}</CardTitle>
                 <Switch
-                  checked={draft.cards.ADCB_365.enabled}
+                  checked={draft.ADCB_365.enabled}
                   onCheckedChange={(checked) =>
                     setDraft({
                       ...draft,
-                      cards: { ...draft.cards, ADCB_365: { ...draft.cards.ADCB_365, enabled: checked } },
+                      ADCB_365: { ...draft.ADCB_365, enabled: checked },
                     })
                   }
                   aria-label="Include ADCB 365"
@@ -100,14 +97,11 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="adcb-minspend"
-                  checked={draft.cards.ADCB_365.minSpendMet}
+                  checked={draft.ADCB_365.minSpendMet}
                   onCheckedChange={(checked) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        ADCB_365: { ...draft.cards.ADCB_365, minSpendMet: checked === true },
-                      },
+                      ADCB_365: { ...draft.ADCB_365, minSpendMet: checked === true },
                     })
                   }
                 />
@@ -124,11 +118,11 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{CARD_NAMES.EI_SWITCH}</CardTitle>
                 <Switch
-                  checked={draft.cards.EI_SWITCH.enabled}
+                  checked={draft.EI_SWITCH.enabled}
                   onCheckedChange={(checked) =>
                     setDraft({
                       ...draft,
-                      cards: { ...draft.cards, EI_SWITCH: { ...draft.cards.EI_SWITCH, enabled: checked } },
+                      EI_SWITCH: { ...draft.EI_SWITCH, enabled: checked },
                     })
                   }
                   aria-label="Include Emirates Islamic SWITCH"
@@ -139,14 +133,11 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
               <div className="space-y-2">
                 <Label>Plan</Label>
                 <RadioGroup
-                  value={draft.cards.EI_SWITCH.plan}
+                  value={draft.EI_SWITCH.plan}
                   onValueChange={(v) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        EI_SWITCH: { ...draft.cards.EI_SWITCH, plan: v as "lifestyle" | "travel" },
-                      },
+                      EI_SWITCH: { ...draft.EI_SWITCH, plan: v as "lifestyle" | "travel" },
                     })
                   }
                   className="flex gap-4"
@@ -168,14 +159,11 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="ei-minspend"
-                  checked={draft.cards.EI_SWITCH.minSpendMet}
+                  checked={draft.EI_SWITCH.minSpendMet}
                   onCheckedChange={(checked) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        EI_SWITCH: { ...draft.cards.EI_SWITCH, minSpendMet: checked === true },
-                      },
+                      EI_SWITCH: { ...draft.EI_SWITCH, minSpendMet: checked === true },
                     })
                   }
                 />
@@ -192,14 +180,11 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{CARD_NAMES.AJMAN_ULTRACASH}</CardTitle>
                 <Switch
-                  checked={draft.cards.AJMAN_ULTRACASH.enabled}
+                  checked={draft.AJMAN_ULTRACASH.enabled}
                   onCheckedChange={(checked) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        AJMAN_ULTRACASH: { ...draft.cards.AJMAN_ULTRACASH, enabled: checked },
-                      },
+                      AJMAN_ULTRACASH: { ...draft.AJMAN_ULTRACASH, enabled: checked },
                     })
                   }
                   aria-label="Include Ajman ULTRACASH"
@@ -213,7 +198,7 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
                   <div key={cat.value} className="flex items-center space-x-2">
                     <Checkbox
                       id={`ajman-${cat.value}`}
-                      checked={draft.cards.AJMAN_ULTRACASH.activeCategories.includes(cat.value)}
+                      checked={draft.AJMAN_ULTRACASH.activeCategories.includes(cat.value)}
                       onCheckedChange={() => handleAjmanCategoryToggle(cat.value)}
                     />
                     <Label htmlFor={`ajman-${cat.value}`} className="text-sm font-normal cursor-pointer">
@@ -226,22 +211,19 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
             </CardContent>
           </Card>
 
-          {/* SIB Cashback */}
+          {/* SIB Cashback - removed duplicate card section */}
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{CARD_NAMES.SIB_CASHBACK}</CardTitle>
                 <Switch
-                  checked={draft.cards.SIB_CASHBACK.enabled}
+                  checked={draft.SIB_CASHBACK.enabled}
                   onCheckedChange={(checked) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        SIB_CASHBACK: {
-                          ...draft.cards.SIB_CASHBACK,
-                          enabled: checked,
-                        },
+                      SIB_CASHBACK: {
+                        ...draft.SIB_CASHBACK,
+                        enabled: checked,
                       },
                     })
                   }
@@ -257,71 +239,13 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
               <div className="flex items-start space-x-2">
                 <Checkbox
                   id="sib-fuel-wallet"
-                  checked={draft.cards.SIB_CASHBACK.apply10OnFuelWallet}
+                  checked={draft.SIB_CASHBACK.apply10OnFuelWallet}
                   onCheckedChange={(checked) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        SIB_CASHBACK: {
-                          ...draft.cards.SIB_CASHBACK,
-                          apply10OnFuelWallet: checked === true,
-                        },
-                      },
-                    })
-                  }
-                />
-                <Label htmlFor="sib-fuel-wallet" className="text-sm font-normal cursor-pointer leading-relaxed">
-                  Apply 10% on fuel when using Apple / Samsung / Google Pay (wallet).
-                  <span className="block text-muted-foreground text-xs mt-1">
-                    Conservative default: OFF – treat fuel with wallet as normal retail.
-                  </span>
-                </Label>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* SIB Cashback */}
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{CARD_NAMES.SIB_CASHBACK}</CardTitle>
-                <Switch
-                  checked={draft.cards.SIB_CASHBACK.enabled}
-                  onCheckedChange={(checked) =>
-                    setDraft({
-                      ...draft,
-                      cards: {
-                        ...draft.cards,
-                        SIB_CASHBACK: {
-                          ...draft.cards.SIB_CASHBACK,
-                          enabled: checked,
-                        },
-                      },
-                    })
-                  }
-                  aria-label="Include SIB Cashback"
-                />
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                10% online/digital wallet cashback capped at AED 300 per month (this app does not track that cap). No
-                minimum spend.
-              </p>
-              <div className="flex items-start space-x-2">
-                <Checkbox
-                  id="sib-fuel-wallet"
-                  checked={draft.cards.SIB_CASHBACK.apply10OnFuelWallet}
-                  onCheckedChange={(checked) =>
-                    setDraft({
-                      ...draft,
-                      cards: {
-                        ...draft.cards,
-                        SIB_CASHBACK: {
-                          ...draft.cards.SIB_CASHBACK,
-                          apply10OnFuelWallet: checked === true,
-                        },
+                      SIB_CASHBACK: {
+                        ...draft.SIB_CASHBACK,
+                        apply10OnFuelWallet: checked === true,
                       },
                     })
                   }
@@ -342,14 +266,11 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{CARD_NAMES.DIB_WALAA}</CardTitle>
                 <Switch
-                  checked={draft.cards.DIB_WALAA.enabled}
+                  checked={draft.DIB_WALAA.enabled}
                   onCheckedChange={(checked) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        DIB_WALAA: { ...draft.cards.DIB_WALAA, enabled: checked },
-                      },
+                      DIB_WALAA: { ...draft.DIB_WALAA, enabled: checked },
                     })
                   }
                   aria-label="Include DIB Wala'a"
@@ -364,16 +285,13 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
                   type="number"
                   min="0"
                   step="0.001"
-                  value={draft.cards.DIB_WALAA.walaaValuePerPointAED}
+                  value={draft.DIB_WALAA.walaaValuePerPointAED}
                   onChange={(e) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        DIB_WALAA: {
-                          ...draft.cards.DIB_WALAA,
-                          walaaValuePerPointAED: Number.parseFloat(e.target.value) || 0,
-                        },
+                      DIB_WALAA: {
+                        ...draft.DIB_WALAA,
+                        walaaValuePerPointAED: Number.parseFloat(e.target.value) || 0,
                       },
                     })
                   }
@@ -388,14 +306,11 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{CARD_NAMES.CITI_PREMIER}</CardTitle>
                 <Switch
-                  checked={draft.cards.CITI_PREMIER.enabled}
+                  checked={draft.CITI_PREMIER.enabled}
                   onCheckedChange={(checked) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        CITI_PREMIER: { ...draft.cards.CITI_PREMIER, enabled: checked },
-                      },
+                      CITI_PREMIER: { ...draft.CITI_PREMIER, enabled: checked },
                     })
                   }
                   aria-label="Include Citi Premier"
@@ -410,16 +325,13 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
                   type="number"
                   min="0"
                   step="0.01"
-                  value={draft.cards.CITI_PREMIER.aedPerUsd}
+                  value={draft.CITI_PREMIER.aedPerUsd}
                   onChange={(e) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        CITI_PREMIER: {
-                          ...draft.cards.CITI_PREMIER,
-                          aedPerUsd: Number.parseFloat(e.target.value) || 0,
-                        },
+                      CITI_PREMIER: {
+                        ...draft.CITI_PREMIER,
+                        aedPerUsd: Number.parseFloat(e.target.value) || 0,
                       },
                     })
                   }
@@ -432,16 +344,13 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
                   type="number"
                   min="0"
                   step="0.001"
-                  value={draft.cards.CITI_PREMIER.tyValuePerPointAED}
+                  value={draft.CITI_PREMIER.tyValuePerPointAED}
                   onChange={(e) =>
                     setDraft({
                       ...draft,
-                      cards: {
-                        ...draft.cards,
-                        CITI_PREMIER: {
-                          ...draft.cards.CITI_PREMIER,
-                          tyValuePerPointAED: Number.parseFloat(e.target.value) || 0,
-                        },
+                      CITI_PREMIER: {
+                        ...draft.CITI_PREMIER,
+                        tyValuePerPointAED: Number.parseFloat(e.target.value) || 0,
                       },
                     })
                   }
