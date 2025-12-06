@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { PurchaseForm } from "@/components/purchase-form"
 import { ResultsDisplay } from "@/components/results-display"
 import { CardSettingsPanel } from "@/components/card-settings-panel"
@@ -11,7 +12,6 @@ import {
   type PurchaseInput,
   type ComputeResult,
 } from "@/lib/cards"
-import { CreditCard } from "lucide-react"
 
 const STORAGE_KEY = "which-card-settings"
 
@@ -48,17 +48,29 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="container mx-auto max-w-2xl px-4 py-8">
-        {/* Header */}
-        <header className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Which Card?</h1>
+    <main className="min-h-screen bg-background pwa-safe-bottom">
+      <header className="bg-brand-header text-brand-header-foreground pwa-safe-top">
+        <div className="container mx-auto max-w-2xl px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              href="https://www.raqm.ae"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center hover:opacity-80 transition-opacity"
+            >
+              <span className="text-xl font-semibold tracking-wide">RAQM</span>
+            </Link>
+            <div className="h-6 w-px bg-white/20" />
+            <div className="flex flex-col">
+              <span className="text-lg font-semibold leading-tight">Which Card?</span>
+              <span className="text-xs text-white/60">by RAQM</span>
+            </div>
           </div>
           <CardSettingsPanel settings={settings} onSave={handleSettingsSave} />
-        </header>
+        </div>
+      </header>
 
+      <div className="container mx-auto max-w-2xl px-4 py-6">
         {/* Purchase form */}
         <PurchaseForm onSubmit={handlePurchaseSubmit} />
 

@@ -8,33 +8,41 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Which Card? - UAE Credit Card Optimizer",
+  title: "RAQM – Which Card?",
+  applicationName: "RAQM Card Advisor",
   description:
     "Find the best UAE credit card for your next purchase. Compare ADCB 365, Emirates Islamic SWITCH, Ajman ULTRACASH, SIB Cashback, DIB Wala'a, and Citi Premier.",
   generator: "v0.app",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "RAQM Card",
+  },
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
+        url: "/icons/raqm-card-192.jpg",
+        sizes: "192x192",
+        type: "image/png",
       },
       {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/icons/raqm-card-512.jpg",
+        sizes: "512x512",
+        type: "image/png",
       },
     ],
-    apple: "/apple-icon.png",
+    apple: "/icons/raqm-card-apple-180.jpg",
   },
 }
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#000000",
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#0f172a",
 }
 
 export default function RootLayout({
