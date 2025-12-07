@@ -6,6 +6,7 @@ import { PurchaseForm } from "@/components/purchase-form"
 import { ResultsDisplay } from "@/components/results-display"
 import { CardSettingsPanel } from "@/components/card-settings-panel"
 import { ConsentBanner, ConsentSettingsButton } from "@/components/consent-banner"
+import { HowWeCalculateModal } from "@/components/how-we-calculate-modal"
 import { logCardRequest } from "@/lib/log-card-request"
 import {
   computeBestCard,
@@ -77,11 +78,22 @@ export default function Home() {
       </header>
 
       <div className="container mx-auto max-w-2xl px-4 py-6">
+        {/* How we calculate this link below the header */}
+        <div className="flex justify-center mb-4">
+          <HowWeCalculateModal />
+        </div>
+
         {/* Purchase form */}
         <PurchaseForm onSubmit={handlePurchaseSubmit} />
 
         {/* Results */}
         {result && <ResultsDisplay result={result} />}
+
+        {/* Disclaimer text below results */}
+        <p className="mt-6 text-xs text-muted-foreground text-center leading-relaxed">
+          <strong>Disclaimer:</strong> This tool is an estimate only. Card terms, MCC coding, caps and bank policies may
+          change. Always check your bank&apos;s latest terms and your statements.
+        </p>
       </div>
 
       <footer className="container mx-auto max-w-2xl px-4 py-4 text-center">
