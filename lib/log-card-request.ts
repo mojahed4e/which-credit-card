@@ -12,6 +12,7 @@
 
 import type { CardSettings, ComputeResult, PurchaseInput } from "./cards"
 import { getConsentFromStorage, type ConsentLevel } from "./consent"
+import { getCurrentPosition, type GeoPosition } from "./geolocation"
 
 export interface LogCardRequestPayload {
   purchase: PurchaseInput
@@ -19,16 +20,23 @@ export interface LogCardRequestPayload {
   results: ComputeResult["results"]
   settings: CardSettings
   consent: ConsentLevel
+  gpsLocation?: GeoPosition | null
 }
 
 /**
  * Log a card request to Supabase (non-blocking).
  * Call this with `void logCardRequest(...)` to avoid awaiting.
+ *
+ * @param purchase - The purchase input
+ * @param result - The computed result
+ * @param settings - The card settings
+ * @param includeGps - Whether to include GPS location (requires user permission)
  */
 export async function logCardRequest(
   purchase: PurchaseInput,
   result: ComputeResult,
   settings: CardSettings,
+  includeGps = true,
 ): Promise<void> {
   try {
     const consent = getConsentFromStorage()
@@ -38,12 +46,21 @@ export async function logCardRequest(
       return
     }
 
+    let gpsLocation: GeoPosition | null = null
+    if (consent === "full" && includeGps) {
+      const geoResult = await getCurrentPosition(true, 10000)
+      if (geoResult.success && geoResult.position) {
+        gpsLocation = geoResult.position
+      }
+    }
+
     const payload: LogCardRequestPayload = {
       purchase,
       bestCard: result.bestCard,
       results: result.results,
       settings,
       consent,
+      gpsLocation,
     }
 
     await fetch("/api/log-card-request", {

@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Shield, X } from "lucide-react"
+import { Shield, X, MapPin } from "lucide-react"
 import { hasConsentDecision, setConsent, getConsentFromStorage, clearConsent, type ConsentLevel } from "@/lib/consent"
+import { isGeolocationSupported, getCurrentPosition, checkGeolocationPermission } from "@/lib/geolocation"
 
 interface ConsentBannerProps {
   /** Called when user makes a consent decision */
@@ -15,17 +16,36 @@ export function ConsentBanner({ onConsentChange }: ConsentBannerProps) {
   const [showBanner, setShowBanner] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [currentConsent, setCurrentConsent] = useState<ConsentLevel | null>(null)
+  const [locationPermission, setLocationPermission] = useState<"granted" | "denied" | "prompt" | "unknown">("unknown")
+  const [requestingLocation, setRequestingLocation] = useState(false)
 
   useEffect(() => {
     // Check if user has already made a decision
     const hasDecision = hasConsentDecision()
     setShowBanner(!hasDecision)
     setCurrentConsent(getConsentFromStorage())
+
+    checkGeolocationPermission().then(setLocationPermission)
   }, [])
 
-  const handleConsent = (level: ConsentLevel) => {
+  const handleConsent = async (level: ConsentLevel) => {
     setConsent(level)
     setCurrentConsent(level)
+
+    // If full consent, trigger location permission prompt
+    if (level === "full" && isGeolocationSupported()) {
+      setRequestingLocation(true)
+      try {
+        // This will prompt the user for location permission
+        await getCurrentPosition(true, 15000)
+        const permission = await checkGeolocationPermission()
+        setLocationPermission(permission)
+      } catch {
+        // User denied or error - that's okay
+      }
+      setRequestingLocation(false)
+    }
+
     setShowBanner(false)
     setShowSettings(false)
     onConsentChange?.(level)
@@ -41,6 +61,20 @@ export function ConsentBanner({ onConsentChange }: ConsentBannerProps) {
     setCurrentConsent(null)
     setShowBanner(true)
     setShowSettings(false)
+  }
+
+  const handleRequestLocation = async () => {
+    if (!isGeolocationSupported()) return
+
+    setRequestingLocation(true)
+    try {
+      await getCurrentPosition(true, 15000)
+      const permission = await checkGeolocationPermission()
+      setLocationPermission(permission)
+    } catch {
+      // User denied or error
+    }
+    setRequestingLocation(false)
   }
 
   // Consent settings dialog
@@ -76,6 +110,30 @@ export function ConsentBanner({ onConsentChange }: ConsentBannerProps) {
                       : "Not set"}
                 </span>
               </p>
+              {currentConsent === "full" && isGeolocationSupported() && (
+                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Location:{" "}
+                  <span className="font-medium text-foreground">
+                    {locationPermission === "granted"
+                      ? "Enabled"
+                      : locationPermission === "denied"
+                        ? "Blocked"
+                        : "Not requested"}
+                  </span>
+                  {locationPermission !== "granted" && locationPermission !== "denied" && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="h-auto p-0 text-xs"
+                      onClick={handleRequestLocation}
+                      disabled={requestingLocation}
+                    >
+                      {requestingLocation ? "Requesting..." : "Enable"}
+                    </Button>
+                  )}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -83,11 +141,13 @@ export function ConsentBanner({ onConsentChange }: ConsentBannerProps) {
                 variant={currentConsent === "full" ? "default" : "outline"}
                 className="w-full justify-start"
                 onClick={() => handleConsent("full")}
+                disabled={requestingLocation}
               >
-                Allow full logging
+                {requestingLocation ? "Requesting location..." : "Allow full logging"}
               </Button>
               <p className="text-xs text-muted-foreground pl-4">
-                Includes: purchase amount, category, best card, IP address, browser info, and approximate location
+                Includes: purchase data, IP address, browser info, and <strong>precise GPS location</strong> (if
+                permitted)
               </p>
             </div>
 
@@ -126,11 +186,13 @@ export function ConsentBanner({ onConsentChange }: ConsentBannerProps) {
             <Shield className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <div className="flex-1 space-y-3">
               <p className="text-sm">
-                We use analytics to collect information about how you use this app. With your consent, we may also collect technical data to help improve the service. You can change your consent at any time.
+                We log card calculations to improve Which Card. With full consent, we also collect technical data (IP,
+                browser) and may request your <strong>precise location</strong> for analytics. You can change this
+                anytime.
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => handleConsent("full")}>
-                  Allow full logging
+                <Button size="sm" onClick={() => handleConsent("full")} disabled={requestingLocation}>
+                  {requestingLocation ? "Requesting..." : "Allow full logging"}
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => handleConsent("none")}>
                   Only essential
@@ -154,14 +216,31 @@ export function ConsentBanner({ onConsentChange }: ConsentBannerProps) {
 export function ConsentSettingsButton() {
   const [showSettings, setShowSettings] = useState(false)
   const [currentConsent, setCurrentConsent] = useState<ConsentLevel | null>(null)
+  const [locationPermission, setLocationPermission] = useState<"granted" | "denied" | "prompt" | "unknown">("unknown")
+  const [requestingLocation, setRequestingLocation] = useState(false)
 
   useEffect(() => {
     setCurrentConsent(getConsentFromStorage())
+    checkGeolocationPermission().then(setLocationPermission)
   }, [])
 
-  const handleConsent = (level: ConsentLevel) => {
+  const handleConsent = async (level: ConsentLevel) => {
     setConsent(level)
     setCurrentConsent(level)
+
+    // If full consent, trigger location permission prompt
+    if (level === "full" && isGeolocationSupported()) {
+      setRequestingLocation(true)
+      try {
+        await getCurrentPosition(true, 15000)
+        const permission = await checkGeolocationPermission()
+        setLocationPermission(permission)
+      } catch {
+        // User denied or error
+      }
+      setRequestingLocation(false)
+    }
+
     setShowSettings(false)
   }
 
@@ -169,8 +248,21 @@ export function ConsentSettingsButton() {
     clearConsent()
     setCurrentConsent(null)
     setShowSettings(false)
-    // Force page reload to show banner
     window.location.reload()
+  }
+
+  const handleRequestLocation = async () => {
+    if (!isGeolocationSupported()) return
+
+    setRequestingLocation(true)
+    try {
+      await getCurrentPosition(true, 15000)
+      const permission = await checkGeolocationPermission()
+      setLocationPermission(permission)
+    } catch {
+      // User denied or error
+    }
+    setRequestingLocation(false)
   }
 
   if (showSettings) {
@@ -205,6 +297,30 @@ export function ConsentSettingsButton() {
                       : "Not set"}
                 </span>
               </p>
+              {currentConsent === "full" && isGeolocationSupported() && (
+                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Location:{" "}
+                  <span className="font-medium text-foreground">
+                    {locationPermission === "granted"
+                      ? "Enabled"
+                      : locationPermission === "denied"
+                        ? "Blocked"
+                        : "Not requested"}
+                  </span>
+                  {locationPermission !== "granted" && locationPermission !== "denied" && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="h-auto p-0 text-xs"
+                      onClick={handleRequestLocation}
+                      disabled={requestingLocation}
+                    >
+                      {requestingLocation ? "Requesting..." : "Enable"}
+                    </Button>
+                  )}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -212,11 +328,13 @@ export function ConsentSettingsButton() {
                 variant={currentConsent === "full" ? "default" : "outline"}
                 className="w-full justify-start"
                 onClick={() => handleConsent("full")}
+                disabled={requestingLocation}
               >
-                Allow full logging
+                {requestingLocation ? "Requesting location..." : "Allow full logging"}
               </Button>
               <p className="text-xs text-muted-foreground pl-4">
-                Includes: purchase amount, category, best card, IP address, browser info, and approximate location
+                Includes: purchase data, IP address, browser info, and <strong>precise GPS location</strong> (if
+                permitted)
               </p>
             </div>
 

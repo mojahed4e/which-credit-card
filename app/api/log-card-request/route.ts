@@ -6,14 +6,12 @@
  * This endpoint:
  * - Respects GDPR consent (reads from cookie)
  * - Captures IP, user_agent, referer, location from headers (when consent is "full")
+ * - Captures precise GPS location from browser (when provided)
+ * - Uses correct client IP (prefers cf-connecting-ip over Vercel proxied IPs)
  * - Uses Supabase service role to bypass RLS
  * - Never throws errors to the client
  *
  * Table: public.card_requests
- *
- * Supabase logging only works when these env vars are present:
- * - NEXT_PUBLIC_SUPABASE_URL
- * - SUPABASE_SERVICE_ROLE_KEY
  */
 
 import { type NextRequest, NextResponse } from "next/server"
@@ -53,23 +51,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, skipped: true, reason: "no_supabase" })
     }
 
-    // Extract headers for logging
-    const ipHeader =
-      req.headers.get("x-forwarded-for") ||
-      req.headers.get("x-real-ip") ||
-      req.headers.get("x-vercel-forwarded-for") ||
-      null
-    const ip = ipHeader ? ipHeader.split(",")[0].trim() : null
+    const cfConnectingIp = req.headers.get("cf-connecting-ip")
+    const xForwardedFor = req.headers.get("x-forwarded-for")
+    const xRealIp = req.headers.get("x-real-ip")
+    const vercelForwardedFor = req.headers.get("x-vercel-forwarded-for")
+
+    // Priority: cf-connecting-ip > x-forwarded-for (first IP) > x-real-ip > x-vercel-forwarded-for
+    let ip: string | null = null
+    if (cfConnectingIp) {
+      ip = cfConnectingIp.trim()
+    } else if (xForwardedFor) {
+      ip = xForwardedFor.split(",")[0].trim()
+    } else if (xRealIp) {
+      ip = xRealIp.trim()
+    } else if (vercelForwardedFor) {
+      ip = vercelForwardedFor.split(",")[0].trim()
+    }
 
     const userAgent = req.headers.get("user-agent") || null
     const referer = req.headers.get("referer") || null
 
-    // Vercel geo headers (only available in production on Vercel)
-    const country = req.headers.get("x-vercel-ip-country") || null
+    const cfIpCountry = req.headers.get("cf-ipcountry")
+    const vercelIpCountry = req.headers.get("x-vercel-ip-country")
+    const country = cfIpCountry || vercelIpCountry || null
+
+    // Vercel geo headers (IP-based, less accurate)
     const region = req.headers.get("x-vercel-ip-country-region") || null
     const city = req.headers.get("x-vercel-ip-city") || null
-    const latitude = req.headers.get("x-vercel-ip-latitude") || null
-    const longitude = req.headers.get("x-vercel-ip-longitude") || null
+    const ipLatitude = req.headers.get("x-vercel-ip-latitude") || null
+    const ipLongitude = req.headers.get("x-vercel-ip-longitude") || null
+    const timezone = req.headers.get("x-vercel-ip-timezone") || null
+    const continent = req.headers.get("x-vercel-ip-continent") || null
+    const asNumber = req.headers.get("x-vercel-ip-as-number") || null
 
     // Build location string from geo data
     const locationParts = [city, region, country].filter(Boolean)
@@ -79,15 +92,44 @@ export async function POST(req: NextRequest) {
     const headersForLog: Record<string, string> = {}
     req.headers.forEach((value, key) => {
       const lower = key.toLowerCase()
-      if (lower.includes("cookie") || lower.includes("authorization")) return
+      // Skip sensitive headers
+      if (
+        lower.includes("cookie") ||
+        lower.includes("authorization") ||
+        lower.includes("oidc-token") ||
+        lower.includes("signature")
+      ) {
+        return
+      }
       headersForLog[key] = value
     })
 
-    // Add geo coordinates to headers if available
-    if (latitude && longitude) {
-      headersForLog["_geo_latitude"] = latitude
-      headersForLog["_geo_longitude"] = longitude
+    if (ipLatitude && ipLongitude) {
+      headersForLog["_ip_geo_latitude"] = ipLatitude
+      headersForLog["_ip_geo_longitude"] = ipLongitude
     }
+
+    if (body.gpsLocation) {
+      headersForLog["_gps_latitude"] = String(body.gpsLocation.latitude)
+      headersForLog["_gps_longitude"] = String(body.gpsLocation.longitude)
+      headersForLog["_gps_accuracy_meters"] = String(body.gpsLocation.accuracy)
+      if (body.gpsLocation.altitude !== null) {
+        headersForLog["_gps_altitude"] = String(body.gpsLocation.altitude)
+      }
+      if (body.gpsLocation.speed !== null) {
+        headersForLog["_gps_speed"] = String(body.gpsLocation.speed)
+      }
+      if (body.gpsLocation.heading !== null) {
+        headersForLog["_gps_heading"] = String(body.gpsLocation.heading)
+      }
+    }
+
+    if (timezone) headersForLog["_ip_timezone"] = timezone
+    if (continent) headersForLog["_ip_continent"] = continent
+    if (asNumber) headersForLog["_ip_as_number"] = asNumber
+
+    const finalLatitude = body.gpsLocation?.latitude ?? (ipLatitude ? Number.parseFloat(ipLatitude) : null)
+    const finalLongitude = body.gpsLocation?.longitude ?? (ipLongitude ? Number.parseFloat(ipLongitude) : null)
 
     // Insert into Supabase
     const { error } = await supabase.from("card_requests").insert({
@@ -111,6 +153,11 @@ export async function POST(req: NextRequest) {
       ip,
       referer,
       location,
+
+      latitude: finalLatitude,
+      longitude: finalLongitude,
+
+      // All headers including geo data
       headers: headersForLog,
     })
 
