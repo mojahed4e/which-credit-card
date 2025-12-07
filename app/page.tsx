@@ -5,6 +5,8 @@ import Link from "next/link"
 import { PurchaseForm } from "@/components/purchase-form"
 import { ResultsDisplay } from "@/components/results-display"
 import { CardSettingsPanel } from "@/components/card-settings-panel"
+import { ConsentBanner, ConsentSettingsButton } from "@/components/consent-banner"
+import { logCardRequest } from "@/lib/log-card-request"
 import {
   computeBestCard,
   DEFAULT_SETTINGS,
@@ -18,6 +20,7 @@ const STORAGE_KEY = "which-card-settings"
 export default function Home() {
   const [settings, setSettings] = useState<CardSettings>(DEFAULT_SETTINGS)
   const [result, setResult] = useState<ComputeResult | null>(null)
+  const [lastPurchase, setLastPurchase] = useState<PurchaseInput | null>(null)
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -36,15 +39,18 @@ export default function Home() {
     setSettings(newSettings)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings))
     // Re-compute if we have a previous result
-    if (result) {
-      // We don't have the last purchase stored, so clear result
-      setResult(null)
+    if (result && lastPurchase) {
+      const computed = computeBestCard(lastPurchase, newSettings)
+      setResult(computed)
     }
   }
 
   const handlePurchaseSubmit = (purchase: PurchaseInput) => {
     const computed = computeBestCard(purchase, settings)
     setResult(computed)
+    setLastPurchase(purchase)
+
+    void logCardRequest(purchase, computed, settings)
   }
 
   return (
@@ -77,6 +83,12 @@ export default function Home() {
         {/* Results */}
         {result && <ResultsDisplay result={result} />}
       </div>
+
+      <footer className="container mx-auto max-w-2xl px-4 py-4 text-center">
+        <ConsentSettingsButton />
+      </footer>
+
+      <ConsentBanner />
     </main>
   )
 }
