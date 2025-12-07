@@ -126,8 +126,7 @@ export function ConsentBanner({ onConsentChange }: ConsentBannerProps) {
             <Shield className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <div className="flex-1 space-y-3">
               <p className="text-sm">
-                We use Supabase to log card calculations (amount, category) and, with your consent, technical data like
-                IP, browser and rough location. This helps us improve Which Card. You can change your choice anytime.
+                We use analytics to collect information about how you use this app. With your consent, we may also collect technical data to help improve the service. You can change your consent at any time.
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button size="sm" onClick={() => handleConsent("full")}>
