@@ -7,6 +7,7 @@ import { ResultsDisplay } from "@/components/results-display"
 import { CardSettingsPanel } from "@/components/card-settings-panel"
 import { ConsentBanner, ConsentSettingsButton } from "@/components/consent-banner"
 import { HowWeCalculateModal } from "@/components/how-we-calculate-modal"
+import { InstallPrompt } from "@/components/install-prompt"
 import { logCardRequest } from "@/lib/log-card-request"
 import {
   computeBestCard,
@@ -87,7 +88,7 @@ export default function Home() {
         <PurchaseForm onSubmit={handlePurchaseSubmit} />
 
         {/* Results */}
-        {result && <ResultsDisplay result={result} />}
+        {result && lastPurchase && <ResultsDisplay result={result} category={lastPurchase.category} />}
 
         {/* Disclaimer text below results */}
         <p className="mt-6 text-xs text-muted-foreground text-center leading-relaxed">
@@ -101,6 +102,7 @@ export default function Home() {
       </footer>
 
       <ConsentBanner />
+      <InstallPrompt />
     </main>
   )
 }

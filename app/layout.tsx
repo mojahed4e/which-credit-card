@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "RAQM – Which Card?",
   applicationName: "RAQM Card Advisor",
   description:
-    "Find the best UAE credit card for your next purchase. Compare ADCB 365, Emirates Islamic SWITCH, Ajman ULTRACASH, SIB Cashback, DIB Wala'a, and Citi Premier.",
+    "Find the best UAE credit card for your next purchase. Compare ADCB 365, Emirates Islamic SWITCH, Ajman ULTRACASH, SIB Cashback, DIB Wala'a, Citi Premier, FAB Travel and Dubai First Cashback.",
   generator: "v0.app",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -39,8 +39,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
   themeColor: "#0f172a",
 }

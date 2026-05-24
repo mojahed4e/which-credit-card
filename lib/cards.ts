@@ -1,6 +1,14 @@
 // Types for the card recommendation system
 
-export type CardId = "ADCB_365" | "EI_SWITCH" | "AJMAN_ULTRACASH" | "SIB_CASHBACK" | "DIB_WALAA" | "CITI_PREMIER"
+export type CardId =
+  | "ADCB_365"
+  | "EI_SWITCH"
+  | "AJMAN_ULTRACASH"
+  | "SIB_CASHBACK"
+  | "DIB_WALAA"
+  | "CITI_PREMIER"
+  | "FAB_TRAVEL"
+  | "DUBAI_FIRST_CASHBACK"
 
 export type Location = "domestic" | "international"
 export type Channel = "pos" | "online" | "wallet"
@@ -58,6 +66,16 @@ export interface CitiSettings extends BasePerCardSettings {
   tyValuePerPointAED: number // default 500/15000 ≈ 0.0333
 }
 
+export interface FabTravelSettings extends BasePerCardSettings {
+  minSpendMet: boolean // AED 5,000 per month required for the 12% travel cashback
+  fabRewardValuePerPointAED: number // default 0.01 — FAB Rewards points typical redemption value
+}
+
+export interface DubaiFirstSettings extends BasePerCardSettings {
+  // No minimum spend; only minimum salary on issuance. Keeping a toggle in case
+  // the user wants to suppress the card without disabling it entirely later.
+}
+
 export interface CardSettings {
   ADCB_365: AdcbSettings
   EI_SWITCH: EiSwitchSettings
@@ -65,6 +83,8 @@ export interface CardSettings {
   SIB_CASHBACK: SibSettings
   DIB_WALAA: DibSettings
   CITI_PREMIER: CitiSettings
+  FAB_TRAVEL: FabTravelSettings
+  DUBAI_FIRST_CASHBACK: DubaiFirstSettings
 }
 
 export interface CardResult {
@@ -89,6 +109,209 @@ export const CARD_NAMES: Record<CardId, string> = {
   SIB_CASHBACK: "SIB Cashback",
   DIB_WALAA: "DIB Wala'a",
   CITI_PREMIER: "Citi Premier",
+  FAB_TRAVEL: "FAB Travel",
+  DUBAI_FIRST_CASHBACK: "Dubai First Cashback",
+}
+
+export interface CardTermsInfo {
+  bank: string
+  productUrl: string
+  tncUrl: string
+  annualFeeAED: number | null
+  annualFeeNote?: string
+  minMonthlySalaryAED: number | null
+  rewardCurrency: string
+  keyTerms: string[]
+  /**
+   * The most restrictive single monthly cashback cap (AED) that the user is most
+   * likely to bump into. Used for cap-headroom display in the UI. Null if uncapped
+   * or points-based.
+   */
+  monthlyCapAED: number | null
+  monthlyCapNote?: string
+  /**
+   * For points-based rewards: concrete redemption examples so the user knows what
+   * the displayed point count actually buys. Empty/undefined for cashback cards.
+   */
+  redemptionGuide?: string[]
+  /**
+   * Last time we verified these terms against the bank's site. ISO date.
+   */
+  lastVerified: string
+}
+
+export const CARD_TERMS: Record<CardId, CardTermsInfo> = {
+  ADCB_365: {
+    bank: "Abu Dhabi Commercial Bank",
+    productUrl: "https://www.adcb.com/en/personal/cards/credit-cards/365-cashback-card",
+    tncUrl: "https://www.adcb.com/en/personal/cards/credit-cards/365-cashback-card",
+    annualFeeAED: 383.25,
+    annualFeeNote: "Free first year, then AED 383.25 (incl. VAT)",
+    minMonthlySalaryAED: 8000,
+    rewardCurrency: "AED cashback",
+    keyTerms: [
+      "Requires AED 5,000 minimum monthly spend to earn cashback.",
+      "6% dining (incl. online food) · 5% grocery · 3% utilities/telecom/fuel/Salik · 1% other.",
+      "Total monthly cashback cap: AED 1,000.",
+      "ADCB has announced this card's benefits will be refreshed effective 1 July 2026 — re-verify before then.",
+    ],
+    monthlyCapAED: 1000,
+    monthlyCapNote: "AED 1,000 total per month across all categories",
+    lastVerified: "2026-05-24",
+  },
+  EI_SWITCH: {
+    bank: "Emirates Islamic",
+    productUrl: "https://www.emiratesislamic.ae/en/cards/credit-cards/switch-cashback-credit-card",
+    tncUrl: "https://www.emiratesislamic.ae/en/terms-and-conditions/switch-cashback-credit-card",
+    annualFeeAED: 0,
+    annualFeeNote: "Free for life",
+    minMonthlySalaryAED: null,
+    rewardCurrency: "AED cashback",
+    keyTerms: [
+      "Requires AED 2,500 minimum monthly spend to earn cashback.",
+      "Lifestyle profile: 8% domestic fuel (cap AED 100/mo) · 4% supermarket / dining / education (cap AED 200/mo each).",
+      "Travel profile: 4% airlines / hotels / dining (cap AED 200/mo each).",
+      "0.5% telecom · utilities · real estate · government. 1% everything else (uncapped).",
+      "Active profile at the end of the calendar month determines cashback for that month.",
+    ],
+    monthlyCapAED: 200,
+    monthlyCapNote: "AED 100/mo on Lifestyle fuel, AED 200/mo on each other accelerated category",
+    lastVerified: "2026-05-24",
+  },
+  AJMAN_ULTRACASH: {
+    bank: "Ajman Bank",
+    productUrl: "https://www.ajmanbank.ae/site/mastercard_ultracash/en",
+    tncUrl: "https://www.ajmanbank.ae/site/files/AB_EN_AR_ULTRACASH_CASHBACK_REWARDS_TC_R2.pdf",
+    annualFeeAED: 500,
+    annualFeeNote: "AED 500; waived in year 2 with AED 12,000 retail spend",
+    minMonthlySalaryAED: 10000,
+    rewardCurrency: "AED cashback",
+    keyTerms: [
+      "Choose any 2 of 4 categories (fuel, supermarket, online, school fees) at 5%.",
+      "1% on everything else.",
+      "Per-category monthly caps: ~AED 400/mo on fuel, ~AED 200/mo on other accelerated categories.",
+      "UAE Nationals: 10% on fuel for the first 3 months (if fuel is selected).",
+      "Cash withdrawals, balance transfers, government, money transfers and wallet top-ups don't earn.",
+    ],
+    monthlyCapAED: 400,
+    monthlyCapNote: "Per-category: AED 400/mo on fuel, AED 200/mo on others",
+    lastVerified: "2026-05-24",
+  },
+  SIB_CASHBACK: {
+    bank: "Sharjah Islamic Bank",
+    productUrl: "https://www.sib.ae/en/Cashback",
+    tncUrl: "https://www.sib.ae/en/Cashback-TCs",
+    annualFeeAED: 199,
+    annualFeeNote: "Free year 1, AED 199 from year 2 (waived with AED 10,000 prior-year spend)",
+    minMonthlySalaryAED: null,
+    rewardCurrency: "AED cashback",
+    keyTerms: [
+      "10% on online & digital-wallet spend (Apple/Samsung/Google Pay), domestic & international.",
+      "10% bucket capped at AED 300 per month total. Other tiers are uncapped.",
+      "0.5% on utilities · telecom · supermarket / hypermarket · government · education.",
+      "2% on international retail · 1% on domestic retail.",
+      "Sharia-compliant 'Covered Card' product.",
+    ],
+    monthlyCapAED: 300,
+    monthlyCapNote: "AED 300/mo total on the 10% online & wallet bucket only",
+    lastVerified: "2026-05-24",
+  },
+  DIB_WALAA: {
+    bank: "Dubai Islamic Bank",
+    productUrl: "https://www.dib.ae/personal/cards/prime-infinite-card",
+    tncUrl: "https://www.dib.ae/personal/cards/prime-infinite-card",
+    annualFeeAED: 0,
+    annualFeeNote: "Free for life (with AED 8,000 monthly spend to keep premium benefits)",
+    minMonthlySalaryAED: 20000,
+    rewardCurrency: "Wala'a points",
+    keyTerms: [
+      "3 pts/AED domestic retail · 3.5 pts/AED foreign-currency retail.",
+      "Only 0.2 pts/AED on supermarket, fuel, education, utilities, telecom, government services.",
+      "EU-region transactions earn ZERO Wala'a points (effective Dec 2019).",
+      "Utility & government bills paid via DIB online/app earn ZERO points.",
+      "Point value depends on redemption — default ~0.005 AED/pt (editable in settings).",
+    ],
+    monthlyCapAED: null,
+    monthlyCapNote: "No monthly cap (points-based)",
+    redemptionGuide: [
+      "Typical redemption: ~0.005 AED per Wala'a point (i.e. 1,000 pts ≈ AED 5).",
+      "Statement credit / cashback: usually the worst-value option — closer to 0.003 AED/pt.",
+      "Travel & duty-free via DIB Rewards portal: often the best value at ~0.005–0.007 AED/pt.",
+      "Points expire after 36 months if unused — redeem in chunks rather than hoarding.",
+    ],
+    lastVerified: "2026-05-24",
+  },
+  CITI_PREMIER: {
+    bank: "Citibank",
+    productUrl: "https://www.citibank.ae/credit-cards/rewards/citi-premier-credit-card",
+    tncUrl: "https://www.citibank.ae/tnc",
+    annualFeeAED: 787.5,
+    annualFeeNote: "AED 750 + 5% VAT (~AED 787.50)",
+    minMonthlySalaryAED: 15000,
+    rewardCurrency: "ThankYou Points",
+    keyTerms: [
+      "3 ThankYou® pts/USD on dining, grocery, fuel.",
+      "2 ThankYou® pts/USD on international (non-AED) spend.",
+      "1 ThankYou® pt/USD on domestic AED spend.",
+      "Best value when transferred to airline partners or redeemed for travel.",
+      "Note: This is the 'Citi Premier' (ThankYou points), not the separate 'Citi PremierMiles' card.",
+    ],
+    monthlyCapAED: null,
+    monthlyCapNote: "No monthly cap stated",
+    redemptionGuide: [
+      "Travel via Citi rewards portal: ~AED 500 per 15,000 pts (~0.033 AED/pt) — what the default in settings uses.",
+      "Airline partner transfers (e.g. Etihad Guest, Asia Miles, Avios): often 0.04–0.08 AED/pt when used for premium-cabin redemptions.",
+      "Statement cashback: typically ~0.02 AED/pt — worst value but no planning required.",
+      "Gift cards / merchandise: usually the worst option, often <0.02 AED/pt.",
+    ],
+    lastVerified: "2026-05-24",
+  },
+  FAB_TRAVEL: {
+    bank: "First Abu Dhabi Bank",
+    productUrl: "https://www.bankfab.com/en-ae/personal/credit-cards/fab-travel-credit-card",
+    tncUrl:
+      "https://www.bankfab.com/-/media/fab-uds/personal/credit-cards/fab-travel-credit-card/pdf/card-benefits-terms-and-conditions-en.pdf",
+    annualFeeAED: 1500,
+    annualFeeNote: "AED 1,500 per year",
+    minMonthlySalaryAED: 20000,
+    rewardCurrency: "FAB Rewards",
+    keyTerms: [
+      "12 FAB Rewards / AED on flights & hotels (bank headline: 12% at default redemption).",
+      "Cap AED 1,800/mo on the travel rewards. Requires AED 5,000 monthly spend.",
+      "Realised AED value depends on how you redeem points — adjust the rate in settings.",
+      "Zero international transaction fee + free flight welcome offer.",
+      "Base FAB Rewards earn on everyday spend — rate not publicly disclosed; estimated ~1 pt/AED.",
+      "14 free airport lounge visits/yr + 4 free Careem airport transfers/yr.",
+    ],
+    monthlyCapAED: 1800,
+    monthlyCapNote: "AED 1,800/mo cap on the 12% travel category",
+    redemptionGuide: [
+      "Default in this app: ~0.01 AED per FAB Reward point — adjust in settings if your typical redemption differs.",
+      "Statement credit / cashback: typically the lowest ratio, often ~0.005–0.01 AED/pt.",
+      "Transfer to airline loyalty (Etihad Guest, Skywards on partner offers): can reach ~0.02 AED/pt on smart redemptions.",
+      "FAB Rewards portal travel & shopping vouchers: middle of the road — check ratios before redeeming.",
+    ],
+    lastVerified: "2026-05-24",
+  },
+  DUBAI_FIRST_CASHBACK: {
+    bank: "Dubai First (FAB Group)",
+    productUrl: "https://www.dubaifirst.com/en-ae/cashback-credit-card",
+    tncUrl:
+      "https://www.dubaifirst.com/-/media/fab-uds/dubaifirst/overview/pdf/terms-and-conditions/dubai-first-cashback-cc-programme-tcs.pdf",
+    annualFeeAED: 399,
+    annualFeeNote: "AED 399; first-year waiver currently advertised",
+    minMonthlySalaryAED: 5000,
+    rewardCurrency: "AED cashback",
+    keyTerms: [
+      "5% cashback on supermarket, dining, fuel.",
+      "AED 150/month cap per 5% category.",
+      "0.5% on all other spend, domestic or international.",
+      "No minimum monthly spend required (only the AED 5,000 salary at issuance).",
+    ],
+    monthlyCapAED: 150,
+    monthlyCapNote: "AED 150/mo cap per 5% category (supermarket, dining, fuel each)",
+    lastVerified: "2026-05-24",
+  },
 }
 
 export const CATEGORY_LABELS: Record<PurchaseCategory, string> = {
@@ -133,6 +356,14 @@ export const DEFAULT_SETTINGS: CardSettings = {
     enabled: true,
     aedPerUsd: 3.67,
     tyValuePerPointAED: 500 / 15000, // ~0.0333
+  },
+  FAB_TRAVEL: {
+    enabled: true,
+    minSpendMet: true,
+    fabRewardValuePerPointAED: 0.01,
+  },
+  DUBAI_FIRST_CASHBACK: {
+    enabled: true,
   },
 }
 
@@ -327,13 +558,20 @@ function calcAjmanUltracash(p: PurchaseInput, settings: AjmanSettings): CardResu
 
   const cashback = p.amountAED * rate
 
+  // UAE Nationals get 10% on fuel for the first 3 months if fuel is selected —
+  // surface as a note so we don't quietly understate their rewards.
+  let extraNote = ""
+  if (derivedCategory === "fuel" && settings.activeCategories.includes("fuel")) {
+    extraNote = " ℹ UAE Nationals: 10% on fuel for the first 3 months on this card (not modelled here)."
+  }
+
   return {
     cardId: "AJMAN_ULTRACASH",
     cardName: CARD_NAMES.AJMAN_ULTRACASH,
     rewardType: "cashback",
     rewardValueAED: cashback,
     effectiveRate: rate,
-    note: `${categoryNote} (monthly caps per category not tracked).`,
+    note: `${categoryNote} (monthly caps per category not tracked).${extraNote}`,
   }
 }
 
@@ -431,6 +669,18 @@ function calcDibWalaa(p: PurchaseInput, settings: DibSettings): CardResult {
   const valueAED = points * valuePerPoint
   const effectiveRate = valueAED / p.amountAED
 
+  // DIB has two known "earn zero" exclusions that our calc can't detect from a
+  // single transaction, but we should warn the user when they're plausibly
+  // relevant so the displayed number isn't quietly optimistic.
+  const exclusionWarnings: string[] = []
+  if (flags.isInternational) {
+    exclusionWarnings.push("EU-region transactions earn ZERO Wala'a (Dec 2019 rule).")
+  }
+  if (flags.isUtilities || flags.isGovernment) {
+    exclusionWarnings.push("Paying via DIB online/app earns ZERO — use another channel to keep the 0.2 pts/AED.")
+  }
+  const exclusionText = exclusionWarnings.length > 0 ? ` ⚠ ${exclusionWarnings.join(" ")}` : ""
+
   return {
     cardId: "DIB_WALAA",
     cardName: CARD_NAMES.DIB_WALAA,
@@ -438,7 +688,7 @@ function calcDibWalaa(p: PurchaseInput, settings: DibSettings): CardResult {
     rewardValueAED: valueAED,
     rawPoints: points,
     effectiveRate: effectiveRate,
-    note: `${categoryNote}; ${points.toFixed(0)} Wala'a Rewards (~AED ${valueAED.toFixed(2)} equivalent).`,
+    note: `${categoryNote}; ${points.toFixed(0)} Wala'a Rewards (~AED ${valueAED.toFixed(2)} equivalent).${exclusionText}`,
   }
 }
 
@@ -491,6 +741,123 @@ function calcCitiPremier(p: PurchaseInput, settings: CitiSettings): CardResult {
   }
 }
 
+function calcFabTravel(p: PurchaseInput, settings: FabTravelSettings): CardResult {
+  const flags = deriveFlags(p)
+
+  if (!settings.enabled) {
+    return {
+      cardId: "FAB_TRAVEL",
+      cardName: CARD_NAMES.FAB_TRAVEL,
+      rewardType: "points",
+      rewardValueAED: 0,
+      rawPoints: 0,
+      effectiveRate: 0,
+      note: "Card disabled.",
+    }
+  }
+
+  // The bank markets "12% cashback in FAB Rewards on flight & hotel bookings,
+  // capped at AED 1,800/month, with AED 5,000 minimum monthly spend". The
+  // headline 12% is the AED-equivalent at the standard portal redemption
+  // (~0.01 AED per FAB Reward point), i.e. 12 points per AED on travel.
+  //
+  // We model it explicitly as points so the user's redemption-rate setting
+  // determines the *realised* AED value. If they redeem at 0.01 AED/pt they
+  // get the bank's headline 12%. If they expect 0.005 AED/pt (closer to
+  // statement-credit reality), they get 6%. If they hit airline-transfer
+  // sweet spots at 0.02 AED/pt, they get 24%.
+  const valuePerPoint = settings.fabRewardValuePerPointAED
+
+  if (flags.isTravelAir || flags.isTravelHotel) {
+    if (!settings.minSpendMet) {
+      return {
+        cardId: "FAB_TRAVEL",
+        cardName: CARD_NAMES.FAB_TRAVEL,
+        rewardType: "points",
+        rewardValueAED: 0,
+        rawPoints: 0,
+        effectiveRate: 0,
+        note: "12% on flights/hotels requires AED 5,000 monthly spend (toggle off).",
+      }
+    }
+    const pointsPerAED = 12 // bank's effective earn rate on the travel category
+    const points = p.amountAED * pointsPerAED
+    const valueAED = points * valuePerPoint
+    const effectiveRate = p.amountAED > 0 ? valueAED / p.amountAED : 0
+    return {
+      cardId: "FAB_TRAVEL",
+      cardName: CARD_NAMES.FAB_TRAVEL,
+      rewardType: "points",
+      rewardValueAED: valueAED,
+      rawPoints: points,
+      effectiveRate,
+      note: `12 FAB Rewards/AED on flights & hotels — cap AED 1,800/mo (not tracked). Realised value depends on redemption ratio (settings).`,
+    }
+  }
+
+  // Base FAB Rewards earn — not publicly disclosed; use a conservative ~1 pt/AED.
+  // Zero FX fee marketed, so we treat international the same as domestic for the estimate.
+  const pointsPerAED = 1
+  const points = p.amountAED * pointsPerAED
+  const valueAED = points * valuePerPoint
+  const effectiveRate = p.amountAED > 0 ? valueAED / p.amountAED : 0
+
+  return {
+    cardId: "FAB_TRAVEL",
+    cardName: CARD_NAMES.FAB_TRAVEL,
+    rewardType: "points",
+    rewardValueAED: valueAED,
+    rawPoints: points,
+    effectiveRate,
+    note: flags.isInternational
+      ? "Zero FX fee + base FAB Rewards (estimated rate; see T&C for exact earn)."
+      : "Base FAB Rewards on everyday spend (estimated rate; see T&C for exact earn).",
+  }
+}
+
+function calcDubaiFirstCashback(p: PurchaseInput, settings: DubaiFirstSettings): CardResult {
+  const flags = deriveFlags(p)
+
+  if (!settings.enabled) {
+    return {
+      cardId: "DUBAI_FIRST_CASHBACK",
+      cardName: CARD_NAMES.DUBAI_FIRST_CASHBACK,
+      rewardType: "cashback",
+      rewardValueAED: 0,
+      effectiveRate: 0,
+      note: "Card disabled.",
+    }
+  }
+
+  let rate: number
+  let categoryNote: string
+
+  if (flags.isGrocery) {
+    rate = 0.05
+    categoryNote = "5% supermarket (cap AED 150/month)"
+  } else if (flags.isDining) {
+    rate = 0.05
+    categoryNote = "5% dining (cap AED 150/month)"
+  } else if (flags.isFuel) {
+    rate = 0.05
+    categoryNote = "5% fuel (cap AED 150/month)"
+  } else {
+    rate = 0.005
+    categoryNote = "0.5% on all other spend (domestic & international)"
+  }
+
+  const cashback = p.amountAED * rate
+
+  return {
+    cardId: "DUBAI_FIRST_CASHBACK",
+    cardName: CARD_NAMES.DUBAI_FIRST_CASHBACK,
+    rewardType: "cashback",
+    rewardValueAED: cashback,
+    effectiveRate: rate,
+    note: `${categoryNote} (per-category cap not tracked here).`,
+  }
+}
+
 export function computeBestCard(purchase: PurchaseInput, settings: CardSettings): ComputeResult {
   if (purchase.amountAED <= 0) {
     return { bestCard: null, results: [] }
@@ -504,6 +871,8 @@ export function computeBestCard(purchase: PurchaseInput, settings: CardSettings)
   results.push(calcSibCashback(purchase, settings.SIB_CASHBACK))
   results.push(calcDibWalaa(purchase, settings.DIB_WALAA))
   results.push(calcCitiPremier(purchase, settings.CITI_PREMIER))
+  results.push(calcFabTravel(purchase, settings.FAB_TRAVEL))
+  results.push(calcDubaiFirstCashback(purchase, settings.DUBAI_FIRST_CASHBACK))
 
   results.sort((a, b) => b.effectiveRate - a.effectiveRate)
 

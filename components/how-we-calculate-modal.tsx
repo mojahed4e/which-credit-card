@@ -403,6 +403,40 @@ export function HowWeCalculateModal() {
                   </div>
                 </div>
               </CardSection>
+
+              <CardSection title="FAB Travel (FAB Rewards)">
+                <ul className="space-y-1.5 list-disc list-inside">
+                  <li>
+                    We apply 12% on airline tickets and hotel bookings when the AED 5,000 minimum monthly spend toggle
+                    is on (capped AED 1,800/month, not tracked here).
+                  </li>
+                  <li>
+                    FAB does not publicly disclose the base FAB Rewards earn rate. We assume 1 point per AED at your
+                    chosen point value (default 0.01 AED/pt) — so an estimated ~1% on everyday spend.
+                  </li>
+                  <li>
+                    Zero international transaction fee is advertised, so we treat domestic and foreign-currency spend
+                    the same for the base earn estimate.
+                  </li>
+                  <li>
+                    The 12% is paid in FAB Rewards (redeemable for travel, shopping or airline miles), not AED to your
+                    account — value depends on how you redeem.
+                  </li>
+                </ul>
+              </CardSection>
+
+              <CardSection title="Dubai First Cashback">
+                <ul className="space-y-1.5 list-disc list-inside">
+                  <li>
+                    We apply 5% on supermarket, dining, and fuel — each capped at AED 150 per month (not tracked here).
+                  </li>
+                  <li>0.5% on everything else, whether domestic or international.</li>
+                  <li>
+                    No minimum monthly spend required (only a minimum salary at issuance, AED 5,000). Annual fee AED
+                    399, first-year waiver advertised at the time of writing.
+                  </li>
+                </ul>
+              </CardSection>
             </div>
 
             {/* Settings note */}

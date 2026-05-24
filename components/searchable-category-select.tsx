@@ -23,13 +23,18 @@ export function SearchableCategorySelect({ value, onChange }: SearchableCategory
 
   const selectedOption = CATEGORY_OPTIONS.find((opt) => opt.value === value)
 
-  // Filter options based on query
+  // Filter options based on query — tokenize so "carrefour grocery" matches.
   const filteredOptions = useMemo(() => {
-    if (!query.trim()) return CATEGORY_OPTIONS
-    const q = query.toLowerCase()
-    return CATEGORY_OPTIONS.filter(
-      (opt) => opt.label.toLowerCase().includes(q) || opt.keywords.some((kw) => kw.toLowerCase().includes(q)),
-    )
+    const q = query.trim().toLowerCase()
+    if (!q) return CATEGORY_OPTIONS
+    const tokens = q.split(/\s+/).filter(Boolean)
+    const matches = (opt: CategoryOption) =>
+      tokens.every(
+        (tok) =>
+          opt.label.toLowerCase().includes(tok) ||
+          opt.keywords.some((kw) => kw.toLowerCase().includes(tok)),
+      )
+    return CATEGORY_OPTIONS.filter(matches)
   }, [query])
 
   // Group filtered options
@@ -174,7 +179,63 @@ export function SearchableCategorySelect({ value, onChange }: SearchableCategory
           {/* Options list */}
           <div ref={listRef} className="overflow-y-auto flex-1 py-1" role="listbox">
             {flatList.length === 0 ? (
-              <div className="px-3 py-6 text-center text-sm text-muted-foreground">No matching categories</div>
+              <div className="px-3 py-6 text-sm text-muted-foreground space-y-3">
+                <p className="text-center font-medium text-foreground">No matching categories</p>
+                <div className="space-y-2">
+                  <p className="text-xs">Try one of these instead:</p>
+                  <ul className="text-xs space-y-1 list-disc list-inside">
+                    <li>
+                      A pharmacy, salon, gym, taxi, cinema or doctor visit → pick{" "}
+                      <button
+                        type="button"
+                        className="underline hover:text-foreground"
+                        onClick={() => handleSelect(CATEGORY_OPTIONS.find((o) => o.value === "instore_shopping")!)}
+                      >
+                        In-store shopping
+                      </button>
+                    </li>
+                    <li>
+                      Streaming, subscription, app store, AWS, ChatGPT → pick{" "}
+                      <button
+                        type="button"
+                        className="underline hover:text-foreground"
+                        onClick={() => handleSelect(CATEGORY_OPTIONS.find((o) => o.value === "online_shopping")!)}
+                      >
+                        Online shopping
+                      </button>
+                    </li>
+                    <li>
+                      Salik, Nol, parking, traffic fine → pick{" "}
+                      <button
+                        type="button"
+                        className="underline hover:text-foreground"
+                        onClick={() => handleSelect(CATEGORY_OPTIONS.find((o) => o.value === "utilities")!)}
+                      >
+                        Utilities
+                      </button>{" "}
+                      or{" "}
+                      <button
+                        type="button"
+                        className="underline hover:text-foreground"
+                        onClick={() => handleSelect(CATEGORY_OPTIONS.find((o) => o.value === "government")!)}
+                      >
+                        Government
+                      </button>
+                    </li>
+                    <li>
+                      Truly nothing fits → use{" "}
+                      <button
+                        type="button"
+                        className="underline hover:text-foreground"
+                        onClick={() => handleSelect(CATEGORY_OPTIONS.find((o) => o.value === "other")!)}
+                      >
+                        Other
+                      </button>{" "}
+                      (most cards pay 0.5–1% base on uncategorised retail).
+                    </li>
+                  </ul>
+                </div>
+              </div>
             ) : (
               (["food", "bills", "shopping", "travel"] as const).map((groupKey) => {
                 const items = groupedOptions[groupKey]

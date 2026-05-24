@@ -10,8 +10,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Switch } from "@/components/ui/switch"
 import { Settings } from "lucide-react"
-import type { CardSettings, AjmanCategory } from "@/lib/cards"
-import { CARD_NAMES } from "@/lib/cards"
+import type { CardSettings, AjmanCategory, CardId } from "@/lib/cards"
+import { CARD_NAMES, CARD_TERMS } from "@/lib/cards"
+import { CardEligibilityChips } from "@/components/card-eligibility-chips"
+import { BankBadge } from "@/components/bank-badge"
+import { ExternalLink } from "lucide-react"
 
 interface CardSettingsPanelProps {
   settings: CardSettings
@@ -24,6 +27,30 @@ const AJMAN_CATEGORIES: { value: AjmanCategory; label: string }[] = [
   { value: "online", label: "Online" },
   { value: "school", label: "School fees" },
 ]
+
+function CardTitleWithTerms({ cardId }: { cardId: CardId }) {
+  const terms = CARD_TERMS[cardId]
+  return (
+    <div className="flex flex-col gap-1.5 min-w-0">
+      <div className="flex items-center gap-2 min-w-0">
+        <BankBadge cardId={cardId} size="sm" />
+        <CardTitle className="text-base truncate">{CARD_NAMES[cardId]}</CardTitle>
+        <a
+          href={terms.tncUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground hover:underline shrink-0"
+          aria-label={`Open official ${CARD_NAMES[cardId]} terms in a new tab`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          T&amp;C
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      </div>
+      <CardEligibilityChips cardId={cardId} />
+    </div>
+  )
+}
 
 export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) {
   const [open, setOpen] = useState(false)
@@ -80,7 +107,7 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{CARD_NAMES.ADCB_365}</CardTitle>
+                <CardTitleWithTerms cardId="ADCB_365" />
                 <Switch
                   checked={draft.ADCB_365.enabled}
                   onCheckedChange={(checked) =>
@@ -116,7 +143,7 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{CARD_NAMES.EI_SWITCH}</CardTitle>
+                <CardTitleWithTerms cardId="EI_SWITCH" />
                 <Switch
                   checked={draft.EI_SWITCH.enabled}
                   onCheckedChange={(checked) =>
@@ -178,7 +205,7 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{CARD_NAMES.AJMAN_ULTRACASH}</CardTitle>
+                <CardTitleWithTerms cardId="AJMAN_ULTRACASH" />
                 <Switch
                   checked={draft.AJMAN_ULTRACASH.enabled}
                   onCheckedChange={(checked) =>
@@ -215,7 +242,7 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{CARD_NAMES.SIB_CASHBACK}</CardTitle>
+                <CardTitleWithTerms cardId="SIB_CASHBACK" />
                 <Switch
                   checked={draft.SIB_CASHBACK.enabled}
                   onCheckedChange={(checked) =>
@@ -264,7 +291,7 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{CARD_NAMES.DIB_WALAA}</CardTitle>
+                <CardTitleWithTerms cardId="DIB_WALAA" />
                 <Switch
                   checked={draft.DIB_WALAA.enabled}
                   onCheckedChange={(checked) =>
@@ -304,7 +331,7 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{CARD_NAMES.CITI_PREMIER}</CardTitle>
+                <CardTitleWithTerms cardId="CITI_PREMIER" />
                 <Switch
                   checked={draft.CITI_PREMIER.enabled}
                   onCheckedChange={(checked) =>
@@ -356,6 +383,89 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
                   }
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* FAB Travel */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitleWithTerms cardId="FAB_TRAVEL" />
+                <Switch
+                  checked={draft.FAB_TRAVEL.enabled}
+                  onCheckedChange={(checked) =>
+                    setDraft({
+                      ...draft,
+                      FAB_TRAVEL: { ...draft.FAB_TRAVEL, enabled: checked },
+                    })
+                  }
+                  aria-label="Include FAB Travel"
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start space-x-2">
+                <Checkbox
+                  id="fab-minspend"
+                  checked={draft.FAB_TRAVEL.minSpendMet}
+                  onCheckedChange={(checked) =>
+                    setDraft({
+                      ...draft,
+                      FAB_TRAVEL: { ...draft.FAB_TRAVEL, minSpendMet: checked === true },
+                    })
+                  }
+                />
+                <Label htmlFor="fab-minspend" className="text-sm font-normal cursor-pointer leading-relaxed">
+                  I usually meet the AED 5,000 minimum monthly spend for the 12% travel cashback.
+                </Label>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fab-point-value">AED value per FAB Rewards point (default 0.01)</Label>
+                <Input
+                  id="fab-point-value"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  value={draft.FAB_TRAVEL.fabRewardValuePerPointAED}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      FAB_TRAVEL: {
+                        ...draft.FAB_TRAVEL,
+                        fabRewardValuePerPointAED: Number.parseFloat(e.target.value) || 0,
+                      },
+                    })
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  FAB does not publicly disclose the base earn rate. We assume 1 point per AED at your chosen value.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Dubai First Cashback */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitleWithTerms cardId="DUBAI_FIRST_CASHBACK" />
+                <Switch
+                  checked={draft.DUBAI_FIRST_CASHBACK.enabled}
+                  onCheckedChange={(checked) =>
+                    setDraft({
+                      ...draft,
+                      DUBAI_FIRST_CASHBACK: { ...draft.DUBAI_FIRST_CASHBACK, enabled: checked },
+                    })
+                  }
+                  aria-label="Include Dubai First Cashback"
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                5% cashback on supermarket, dining, and fuel — capped at AED 150 per category per month (not tracked
+                here). 0.5% on everything else, domestic or international.
+              </p>
             </CardContent>
           </Card>
 
