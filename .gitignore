@@ -1,1 +1,35 @@
+# dependencies
+node_modules/
+.pnp/
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+coverage/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# production
+build/
+
+# environment variables (never commit secrets)
 .env
+.env.local
+.env.*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# IDE / editor
+.idea/
+.vscode/
+.DS_Store
+
+# Claude Code agent config (machine-local)
+.claude/

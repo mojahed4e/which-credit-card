@@ -31,11 +31,12 @@ export function getConsentFromStorage(): ConsentLevel | null {
 export function setConsent(level: ConsentLevel): void {
   if (typeof window === "undefined") return
 
-  // Set cookie (1 year expiry)
   const maxAge = 60 * 60 * 24 * 365 // 1 year in seconds
-  document.cookie = `${CONSENT_COOKIE_NAME}=${level}; path=/; max-age=${maxAge}; SameSite=Lax`
+  // Add `Secure` only when served over HTTPS — otherwise the cookie is silently
+  // dropped in local dev (where http://localhost has no Secure context).
+  const secureFlag = window.location.protocol === "https:" ? "; Secure" : ""
+  document.cookie = `${CONSENT_COOKIE_NAME}=${level}; path=/; max-age=${maxAge}; SameSite=Lax${secureFlag}`
 
-  // Set localStorage
   localStorage.setItem(CONSENT_STORAGE_KEY, level)
 }
 
@@ -52,9 +53,8 @@ export function hasConsentDecision(): boolean {
 export function clearConsent(): void {
   if (typeof window === "undefined") return
 
-  // Clear cookie
-  document.cookie = `${CONSENT_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`
+  const secureFlag = window.location.protocol === "https:" ? "; Secure" : ""
+  document.cookie = `${CONSENT_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax${secureFlag}`
 
-  // Clear localStorage
   localStorage.removeItem(CONSENT_STORAGE_KEY)
 }
