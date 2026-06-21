@@ -8,6 +8,7 @@ import { CARD_NAMES, CARD_TERMS } from "@/lib/cards"
 import { CardEligibilityChips } from "@/components/card-eligibility-chips"
 import { CardComparePanel } from "@/components/card-compare-panel"
 import { RealityCheckPanel } from "@/components/reality-check-panel"
+import { PerksCallout } from "@/components/perks-callout"
 import { BankBadge } from "@/components/bank-badge"
 import { getRunnerUpReason } from "@/lib/runner-up"
 import { Trophy, ExternalLink, FileText, GitCompareArrows, Award } from "lucide-react"
@@ -15,9 +16,11 @@ import { Trophy, ExternalLink, FileText, GitCompareArrows, Award } from "lucide-
 interface ResultsDisplayProps {
   result: ComputeResult
   category: PurchaseCategory
+  /** Cards the user holds (enabled in settings) — scopes the perks callout. */
+  enabledCardIds: CardId[]
 }
 
-export function ResultsDisplay({ result, category }: ResultsDisplayProps) {
+export function ResultsDisplay({ result, category, enabledCardIds }: ResultsDisplayProps) {
   const { bestCard, results } = result
   const runnerUp = results.find((r) => r.cardId !== bestCard?.cardId && r.effectiveRate > 0) ?? null
 
@@ -130,6 +133,9 @@ export function ResultsDisplay({ result, category }: ResultsDisplayProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Perks relevant to this purchase (separate from the reward %) */}
+      <PerksCallout category={category} bestCardId={bestCard.cardId} enabledCardIds={enabledCardIds} />
 
       {/* Runner-up alternative */}
       {runnerUp && (() => {

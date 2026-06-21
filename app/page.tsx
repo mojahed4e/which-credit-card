@@ -7,11 +7,13 @@ import { ResultsDisplay } from "@/components/results-display"
 import { CardSettingsPanel } from "@/components/card-settings-panel"
 import { ConsentBanner, ConsentSettingsButton } from "@/components/consent-banner"
 import { HowWeCalculateModal } from "@/components/how-we-calculate-modal"
+import { PerksBrowser } from "@/components/perks-browser"
 import { InstallPrompt } from "@/components/install-prompt"
 import { logCardRequest } from "@/lib/log-card-request"
 import {
   computeBestCard,
   DEFAULT_SETTINGS,
+  type CardId,
   type CardSettings,
   type PurchaseInput,
   type ComputeResult,
@@ -23,6 +25,9 @@ export default function Home() {
   const [settings, setSettings] = useState<CardSettings>(DEFAULT_SETTINGS)
   const [result, setResult] = useState<ComputeResult | null>(null)
   const [lastPurchase, setLastPurchase] = useState<PurchaseInput | null>(null)
+
+  // Cards the user holds = those enabled in settings. Scopes the perks features.
+  const enabledCardIds = (Object.keys(settings) as CardId[]).filter((id) => settings[id]?.enabled)
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -79,16 +84,19 @@ export default function Home() {
       </header>
 
       <div className="container mx-auto max-w-2xl px-4 py-6">
-        {/* How we calculate this link below the header */}
-        <div className="flex justify-center mb-4">
+        {/* How we calculate this + browse perks, below the header */}
+        <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 mb-4">
           <HowWeCalculateModal />
+          <PerksBrowser enabledCardIds={enabledCardIds} />
         </div>
 
         {/* Purchase form */}
         <PurchaseForm onSubmit={handlePurchaseSubmit} />
 
         {/* Results */}
-        {result && lastPurchase && <ResultsDisplay result={result} category={lastPurchase.category} />}
+        {result && lastPurchase && (
+          <ResultsDisplay result={result} category={lastPurchase.category} enabledCardIds={enabledCardIds} />
+        )}
 
         {/* Disclaimer text below results */}
         <p className="mt-6 text-xs text-muted-foreground text-center leading-relaxed">
