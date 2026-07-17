@@ -143,3 +143,20 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+@layer utilities {
+  /* Safe-area padding that never collapses below 1rem, for sticky
+     headers/footers inside full-height sheets and fixed banners. */
+  .pt-safe {
+    padding-top: max(env(safe-area-inset-top, 0px), 1rem);
+  }
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 1rem);
+  }
+  /* Modal height cap: svh tracks the actually-visible viewport on iOS
+     (vh over-reports it in Safari with the toolbar shown). */
+  .max-h-modal {
+    max-height: 85vh;
+    max-height: 85svh;
+  }
+}

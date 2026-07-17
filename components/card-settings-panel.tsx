@@ -97,12 +97,12 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
           <Settings className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader>
+      <SheetContent className="w-full sm:max-w-lg gap-0">
+        <SheetHeader className="pt-safe border-b shrink-0">
           <SheetTitle>Card Settings</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {/* ADCB 365 */}
           <Card>
             <CardHeader className="pb-2">
@@ -544,6 +544,10 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
             </CardContent>
           </Card>
 
+        </div>
+
+        <div className="shrink-0 border-t bg-background p-4 pb-safe">
+          {ajmanError && <p className="mb-2 text-sm text-destructive">{ajmanError}</p>}
           <Button onClick={handleSave} className="w-full">
             Save settings
           </Button>

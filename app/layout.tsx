@@ -39,6 +39,9 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Prevents iOS auto-zoom on input focus, which persists in standalone
+  // mode and crops fixed-position dialogs. iOS still allows pinch zoom.
+  maximumScale: 1,
   viewportFit: "cover",
   themeColor: "#0f172a",
 }

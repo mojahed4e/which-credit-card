@@ -13,7 +13,6 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 type CardLink = { label: string; href: string }
 type CardHighlight = { label: string; value: string }
@@ -101,13 +100,13 @@ export function HowWeCalculateModal() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-lg max-h-[85vh] p-0">
-        <DialogHeader className="p-4 pb-0">
+      <DialogContent className="max-h-modal flex flex-col gap-0 overflow-hidden p-0">
+        <DialogHeader className="shrink-0 p-4 pb-2">
           <DialogTitle>How this works</DialogTitle>
           <DialogDescription>Understanding our reward calculations and assumptions</DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(85vh-80px)] px-4 pb-4">
+        <div className="flex-1 overflow-y-auto break-words px-4 pb-4">
           <div className="space-y-4">
             {/* General Assumptions */}
             <div className="space-y-2">
@@ -521,7 +520,7 @@ export function HowWeCalculateModal() {
               If you change settings (min spend toggles, plan selection, conservative mode, points valuation), calculations update instantly. We still show the official caps/eligibility rules here for context.
             </p>
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   )

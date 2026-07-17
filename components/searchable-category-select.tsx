@@ -172,7 +172,7 @@ export function SearchableCategorySelect({ value, onChange }: SearchableCategory
               value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              className="flex-1 bg-transparent text-base sm:text-sm outline-none placeholder:text-muted-foreground"
             />
           </div>
 

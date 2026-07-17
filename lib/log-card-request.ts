@@ -12,7 +12,7 @@
 
 import type { CardSettings, ComputeResult, PurchaseInput } from "./cards"
 import { getConsentFromStorage, type ConsentLevel } from "./consent"
-import { getCurrentPosition, type GeoPosition } from "./geolocation"
+import { checkGeolocationPermission, getCurrentPosition, type GeoPosition } from "./geolocation"
 
 export interface LogCardRequestPayload {
   purchase: PurchaseInput
@@ -48,9 +48,16 @@ export async function logCardRequest(
 
     let gpsLocation: GeoPosition | null = null
     if (consent === "full" && includeGps) {
-      const geoResult = await getCurrentPosition(true, 10000)
-      if (geoResult.success && geoResult.position) {
-        gpsLocation = geoResult.position
+      // Only attach GPS if permission is already granted. Requesting it here
+      // would surface the OS permission popup on every launch of the iOS
+      // home-screen app (which resets the grant each session) — the prompt
+      // must only come from an explicit user action in the consent UI.
+      const permission = await checkGeolocationPermission()
+      if (permission === "granted") {
+        const geoResult = await getCurrentPosition(true, 10000)
+        if (geoResult.success && geoResult.position) {
+          gpsLocation = geoResult.position
+        }
       }
     }
 

@@ -16,7 +16,6 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sparkles, ExternalLink } from "lucide-react"
 
 interface PerksBrowserProps {
@@ -58,8 +57,8 @@ export function PerksBrowser({ enabledCardIds }: PerksBrowserProps) {
           <span className="text-xs">Browse card perks</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[85vh] p-0">
-        <DialogHeader className="p-4 pb-2">
+      <DialogContent className="max-h-modal flex flex-col gap-0 overflow-hidden p-0">
+        <DialogHeader className="shrink-0 p-4 pb-2">
           <DialogTitle>Card perks</DialogTitle>
           <DialogDescription>
             Which of your cards gets you valet, lounge access, discounts and more. Scoped to the cards you&apos;ve
@@ -73,9 +72,9 @@ export function PerksBrowser({ enabledCardIds }: PerksBrowserProps) {
           </div>
         ) : (
           <>
-            {/* Category filter chips */}
-            <div className="px-4 pb-2">
-              <div className="flex flex-wrap gap-1.5">
+            {/* Category filter chips: single scrollable row on phones, wrapped on larger screens */}
+            <div className="shrink-0 px-4 pb-2">
+              <div className="flex gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-x-visible sm:pb-0">
                 {categories.map((cat) => {
                   const isActive = cat === activeCategory
                   return (
@@ -83,7 +82,7 @@ export function PerksBrowser({ enabledCardIds }: PerksBrowserProps) {
                       key={cat}
                       type="button"
                       onClick={() => setActive(cat)}
-                      className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs transition-colors ${
+                      className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-2 py-1 text-xs transition-colors ${
                         isActive
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-background text-muted-foreground hover:bg-accent"
@@ -97,7 +96,7 @@ export function PerksBrowser({ enabledCardIds }: PerksBrowserProps) {
               </div>
             </div>
 
-            <ScrollArea className="max-h-[calc(85vh-180px)] px-4 pb-4">
+            <div className="flex-1 overflow-y-auto break-words px-4 pb-4">
               <div className="space-y-3">
                 {groups.map(({ cardId, perks }) => (
                   <div key={cardId} className="rounded-md border border-border p-3 space-y-2">
@@ -143,7 +142,7 @@ export function PerksBrowser({ enabledCardIds }: PerksBrowserProps) {
                 Perks change often and many are tied to your card&apos;s Visa/Mastercard tier. Confirmed{" "}
                 {PERKS_VERIFIED_ON}. Always check the bank&apos;s latest terms.
               </p>
-            </ScrollArea>
+            </div>
           </>
         )}
       </DialogContent>
