@@ -20,6 +20,8 @@ const BADGES: Record<CardId, BadgeSpec> = {
   CITI_PREMIER: { abbr: "Citi", bg: "#003B70", fg: "#FFFFFF", fullName: "Citibank" },
   FAB_TRAVEL: { abbr: "FAB", bg: "#1E2F5C", fg: "#FFFFFF", fullName: "First Abu Dhabi Bank" },
   DUBAI_FIRST_CASHBACK: { abbr: "DF", bg: "#1A1A1A", fg: "#D4AF37", fullName: "Dubai First" },
+  ENBD_DARNA_SIGNATURE: { abbr: "ENBD", bg: "#00205B", fg: "#C9A96A", fullName: "Emirates NBD" },
+  ADIB_GOLD_DEBIT: { abbr: "ADIB", bg: "#006B68", fg: "#D4AF37", fullName: "Abu Dhabi Islamic Bank" },
 }
 
 interface BankBadgeProps {

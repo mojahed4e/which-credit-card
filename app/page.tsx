@@ -34,8 +34,10 @@ export default function Home() {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as CardSettings
-        setSettings(parsed)
+        const parsed = JSON.parse(stored) as Partial<CardSettings>
+        // Merge over defaults so settings stored before a card existed don't
+        // leave its entry undefined (which would crash that card's calculator).
+        setSettings({ ...DEFAULT_SETTINGS, ...parsed })
       } catch {
         // Invalid JSON, use defaults
       }

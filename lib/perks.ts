@@ -128,6 +128,8 @@ export const CARD_NETWORK_TIER: Record<CardId, NetworkTier | null> = {
   CITI_PREMIER: "Mastercard World Elite",
   FAB_TRAVEL: "Mastercard World Elite",
   DUBAI_FIRST_CASHBACK: null, // Mastercard; tier not printed on official page
+  ENBD_DARNA_SIGNATURE: "Visa Signature",
+  ADIB_GOLD_DEBIT: "Visa Signature",
 }
 
 export const CARD_PERKS: Record<CardId, CardPerk[]> = {
@@ -670,6 +672,157 @@ export const CARD_PERKS: Record<CardId, CardPerk[]> = {
       relevantCategories: ["online_shopping", "instore_shopping"],
       source: "bank",
       confidence: "high",
+    },
+  ],
+
+  // Darna Signature verified 2026-07-17 against the official ENBD benefits PDF
+  // + product page. Perks marked "min AED 5,000 spend" require that spend in the
+  // calendar month the benefit is used (bank footnote).
+  ENBD_DARNA_SIGNATURE: [
+    {
+      category: "airport_lounge",
+      title: "Unlimited airport lounge access + guest",
+      detail:
+        "Unlimited complimentary access to 1,000+ premium lounges worldwide for you and a guest, via the Visa Airport Companion app. Requires AED 5,000 spend in the month you use it.",
+      partner: "Visa Airport Companion",
+      limit: "Unlimited + 1 guest · min AED 5,000 monthly spend",
+      source: "network",
+      requiredTier: "Visa Signature",
+      confidence: "high",
+      sourceUrl: "https://www.emiratesnbd.com/-/media/enbd/files/cards/darna_signature_credit_card_benefits.pdf",
+    },
+    {
+      category: "hotel_discount",
+      title: "Darna Gold tier: up to 30% off Aldar hotels",
+      detail:
+        "Complimentary Darna Gold membership: up to 30% off stays and 20% off dining at Aldhafra Resort, Crowne Plaza / Radisson Blu / Rotana / Centro / Park Inn / Staybridge Suites on Yas Island, plus golf & padel discounts.",
+      partner: "Darna Rewards by Aldar",
+      discountPct: 30,
+      locations: ["Yas Island hotels", "Aldhafra Resort"],
+      source: "bank",
+      confidence: "high",
+      sourceUrl: "https://www.emiratesnbd.com/-/media/enbd/files/cards/darna_signature_credit_card_benefits.pdf",
+    },
+    {
+      category: "other",
+      title: "20% off Yas Island theme parks",
+      detail: "20% off tickets at Yas Island theme parks and attractions (Ferrari World, Warner Bros, Yas Waterworld, CLYMB…).",
+      partner: "Miral / Yas Island",
+      discountPct: 20,
+      relevantCategories: ["instore_shopping", "online_shopping"],
+      source: "bank",
+      confidence: "high",
+    },
+    {
+      category: "cinema",
+      title: "Vox Cinemas buy-1-get-1 tickets",
+      detail: "Buy-1-get-1 movie tickets at Vox Cinemas; requires AED 5,000 spend in the month of use.",
+      partner: "Vox Cinemas",
+      limit: "min AED 5,000 monthly spend",
+      source: "bank",
+      confidence: "high",
+    },
+    {
+      category: "concierge",
+      title: "Visa Signature concierge",
+      detail:
+        "Dedicated concierge with Visa privileges (Worldwide Hotel Programme, Lacure villas, VIP dining); requires AED 5,000 spend in the month of use.",
+      partner: "Visa Concierge",
+      source: "network",
+      requiredTier: "Visa Signature",
+      confidence: "high",
+    },
+    {
+      category: "other",
+      title: "0% installments at Aldar Education & Property",
+      detail: "0% installment plans (6 or 12 months, no cost) at qualifying Aldar Education & Property merchants; general spend convertible to 3–36 month plans.",
+      relevantCategories: ["education", "government"],
+      source: "bank",
+      confidence: "high",
+    },
+    {
+      category: "other",
+      title: "24/7 roadside assistance",
+      detail: "24/7 roadside assistance (towing, fuel delivery, battery boost); requires AED 5,000 spend in the month of use.",
+      limit: "min AED 5,000 monthly spend",
+      source: "bank",
+      confidence: "high",
+    },
+    {
+      category: "travel_insurance",
+      title: "Purchase protection + 12-month extended warranty",
+      detail: "Card purchases insured against accidental damage or theft, plus a 12-month warranty extension beyond the original.",
+      relevantCategories: ["online_shopping", "instore_shopping"],
+      source: "bank",
+      confidence: "high",
+    },
+    {
+      category: "welcome_offer",
+      title: "3,000 Darna Points welcome bonus (≈ AED 300)",
+      detail: "3,000 Darna Points for spending AED 15,000 in the first 3 months.",
+      source: "bank",
+      confidence: "high",
+    },
+  ],
+
+  // ADIB Gold Visa Signature debit card — perks verified 2026-07-17 against ADIB's
+  // Gold priority-banking lifestyle-benefits pages. No spend rewards; value is perks.
+  ADIB_GOLD_DEBIT: [
+    {
+      category: "airport_lounge",
+      title: "Unlimited airport lounge access (LoungeKey)",
+      detail:
+        "Unlimited complimentary access to 900+ airport lounges worldwide via LoungeKey / the Visa Airport Companion app. Cardholder only — guests are not included.",
+      partner: "LoungeKey / Visa Airport Companion",
+      limit: "Unlimited · cardholder only (no guests)",
+      source: "bank",
+      requiredTier: "Visa Signature",
+      confidence: "high",
+      sourceUrl: "https://www.adib.com/en/personal/priority-banking/adib-gold/life-style-benefits/airport-lounge-access",
+    },
+    {
+      category: "dining_offer",
+      title: "25% off fine dining in the UAE",
+      detail: "25% discount at fine-dining restaurants across the UAE on presentation of the ADIB Gold Visa Signature debit card.",
+      discountPct: 25,
+      source: "bank",
+      confidence: "high",
+      sourceUrl: "https://www.adib.ae/en/personal/priority-banking/gold/lifestyle-benefits",
+    },
+    {
+      category: "golf",
+      title: "2 complimentary golf rounds per month",
+      detail: "Two complimentary rounds of golf every month at select courses, plus discounts on food, beverages and the golf shop.",
+      limit: "2 rounds/month",
+      source: "bank",
+      confidence: "high",
+      sourceUrl: "https://www.adib.ae/en/personal/priority-banking/gold/lifestyle-benefits",
+    },
+    {
+      category: "valet_parking",
+      title: "Free valet parking at select ADIB branches",
+      detail: "Complimentary valet parking at select ADIB branches — just show the ADIB Gold debit card.",
+      source: "bank",
+      confidence: "high",
+      sourceUrl: "https://www.adib.ae/en/personal/priority-banking/gold/lifestyle-benefits",
+    },
+    {
+      category: "concierge",
+      title: "24/7 Visa Concierge",
+      detail: "Round-the-clock Visa Signature concierge for travel, dining and lifestyle bookings worldwide.",
+      partner: "Visa Concierge",
+      source: "network",
+      requiredTier: "Visa Signature",
+      confidence: "high",
+      sourceUrl: "https://www.adib.ae/en/personal/priority-banking/gold/lifestyle-benefits",
+    },
+    {
+      category: "fitness",
+      title: "Health club access",
+      detail: "Complimentary access to selected UAE health clubs (daily member caps vary by location).",
+      source: "bank",
+      confidence: "medium",
+      sourceUrl: "https://www.adib.ae/en/personal/priority-banking/gold/lifestyle-benefits",
     },
   ],
 }

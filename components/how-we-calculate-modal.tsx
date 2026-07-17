@@ -412,7 +412,8 @@ export function HowWeCalculateModal() {
                   </li>
                   <li>
                     FAB does not publicly disclose the base FAB Rewards earn rate. We assume 1 point per AED at your
-                    chosen point value (default 0.01 AED/pt) — so an estimated ~1% on everyday spend.
+                    chosen redemption value (default 0.00303 AED/pt) — so an estimated ~0.3% on everyday spend. The 12%
+                    travel rate is fixed and independent of this setting.
                   </li>
                   <li>
                     Zero international transaction fee is advertised, so we treat domestic and foreign-currency spend
@@ -420,7 +421,7 @@ export function HowWeCalculateModal() {
                   </li>
                   <li>
                     The 12% is paid in FAB Rewards (redeemable for travel, shopping or airline miles), not AED to your
-                    account — value depends on how you redeem.
+                    account — we value it at FAB's standard redemption (~0.00303 AED/pt); smart airline transfers can beat it.
                   </li>
                 </ul>
               </CardSection>
@@ -435,6 +436,82 @@ export function HowWeCalculateModal() {
                     No minimum monthly spend required (only a minimum salary at issuance, AED 5,000). Annual fee AED
                     399, first-year waiver advertised at the time of writing.
                   </li>
+                </ul>
+              </CardSection>
+
+              <CardSection
+                title="Emirates NBD Darna Signature (Darna Points)"
+                links={[
+                  {
+                    label: "Official Darna Visa Credit Card T&Cs (PDF)",
+                    href: "https://www.emiratesnbd.com/-/media/enbd/files/cards/darna_visa_credit_card_tncs.pdf",
+                  },
+                ]}
+                highlights={[
+                  { label: "Aldar destination rate", value: "7.5% back (as Darna Points)" },
+                  { label: "Monthly earn cap", value: "50,000 Darna Points (≈ AED 5,000)" },
+                ]}
+              >
+                <div className="space-y-2">
+                  <div>
+                    <div className="font-medium text-foreground">Rates we apply (per the official T&Cs table)</div>
+                    <ul className="mt-1.5 space-y-1.5 list-disc list-inside">
+                      <li>
+                        <strong>Aldar destinations</strong> (tick the &ldquo;Aldar destination&rdquo; box on the form):
+                        7.5% — Yas Mall, Al Jimi Mall, Aldar hotels &amp; beach clubs, Miral theme parks, golf courses
+                        and 1,200+ Aldar retailers.
+                      </li>
+                      <li>General non-Aldar spend: 1% — same rate domestic, international and EU/UK.</li>
+                      <li>Non-Aldar supermarkets, fast-food, insurance, car dealerships: 0.25%.</li>
+                      <li>
+                        Petroleum, transit, government, utilities, real estate, education, telecom: 0.1% — and Aldar
+                        property &amp; school fees are excluded from the accelerated Aldar tier.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <div className="font-medium text-foreground">How we estimate</div>
+                    <ul className="mt-1.5 space-y-1.5 list-disc list-inside">
+                      <li>
+                        Earn is in Darna Points; the bank&apos;s headline %s assume the fixed redemption of{" "}
+                        <strong>10 Darna Points = AED 1</strong> at Aldar POS / the Darna app. We use that (0.1 AED/pt)
+                        as the default point value — adjustable in settings.
+                      </li>
+                      <li>
+                        We model regular dining at the general rate; fast-food restaurants code into the 0.25% tier.
+                      </li>
+                      <li>
+                        Non-earning transactions include utility bills paid via ENBD online banking, exchange houses,
+                        installment-converted amounts, and fees.
+                      </li>
+                      <li>Points moved to the Darna wallet expire 2 years from issue.</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardSection>
+
+              <CardSection
+                title="ADIB Gold Signature Debit (lifestyle perks)"
+                links={[
+                  {
+                    label: "ADIB Gold lifestyle benefits",
+                    href: "https://www.adib.ae/en/personal/priority-banking/gold/lifestyle-benefits",
+                  },
+                ]}
+                highlights={[
+                  { label: "Rewards on spend", value: "None — it's a debit card" },
+                  { label: "Airport lounges", value: "Unlimited (LoungeKey), cardholder only" },
+                ]}
+              >
+                <ul className="space-y-1.5 list-disc list-inside">
+                  <li>
+                    This is a debit card: it earns no cashback or points, so we score it at 0% on every purchase. It
+                    never tops the ranking — its value is the lifestyle perks below, surfaced against your results.
+                  </li>
+                  <li>Unlimited airport lounge access via LoungeKey / Visa Airport Companion (900+ lounges, cardholder only).</li>
+                  <li>25% off fine dining in the UAE, 2 golf rounds/month, free valet at select ADIB branches, 24/7 Visa Concierge.</li>
+                  <li>Eligibility is relationship-based: AED 250k deposits, or AED 40k salary, or AED 1.25M home finance.</li>
                 </ul>
               </CardSection>
             </div>

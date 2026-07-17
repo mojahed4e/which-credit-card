@@ -420,7 +420,7 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
                 </Label>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="fab-point-value">AED value per FAB Rewards point (default 0.01)</Label>
+                <Label htmlFor="fab-point-value">AED value per FAB Rewards point — base earn (default 0.00303)</Label>
                 <Input
                   id="fab-point-value"
                   type="number"
@@ -439,6 +439,7 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
                 />
                 <p className="text-xs text-muted-foreground">
                   FAB does not publicly disclose the base earn rate. We assume 1 point per AED at your chosen value.
+                  The 12% travel rate is fixed and not affected by this setting.
                 </p>
               </div>
             </CardContent>
@@ -465,6 +466,80 @@ export function CardSettingsPanel({ settings, onSave }: CardSettingsPanelProps) 
               <p className="text-sm text-muted-foreground">
                 5% cashback on supermarket, dining, and fuel — capped at AED 150 per category per month (not tracked
                 here). 0.5% on everything else, domestic or international.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Emirates NBD Darna Signature */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitleWithTerms cardId="ENBD_DARNA_SIGNATURE" />
+                <Switch
+                  checked={draft.ENBD_DARNA_SIGNATURE.enabled}
+                  onCheckedChange={(checked) =>
+                    setDraft({
+                      ...draft,
+                      ENBD_DARNA_SIGNATURE: { ...draft.ENBD_DARNA_SIGNATURE, enabled: checked },
+                    })
+                  }
+                  aria-label="Include Emirates NBD Darna Signature"
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                7.5% back as Darna Points at Aldar destinations (tick &ldquo;Aldar destination&rdquo; on the purchase
+                form), 1% elsewhere, 0.25% at non-Aldar supermarkets, 0.1% on fuel/bills/education. Earn cap 50,000
+                pts/month (not tracked here).
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="darna-sig-value">AED value per Darna Point (default 0.1)</Label>
+                <Input
+                  id="darna-sig-value"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={draft.ENBD_DARNA_SIGNATURE.darnaValuePerPointAED}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      ENBD_DARNA_SIGNATURE: {
+                        ...draft.ENBD_DARNA_SIGNATURE,
+                        darnaValuePerPointAED: Number.parseFloat(e.target.value) || 0,
+                      },
+                    })
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  Bank-stated redemption: 10 Darna Points = AED 1 at Aldar tills / Darna app.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ADIB Gold Signature Debit */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitleWithTerms cardId="ADIB_GOLD_DEBIT" />
+                <Switch
+                  checked={draft.ADIB_GOLD_DEBIT.enabled}
+                  onCheckedChange={(checked) =>
+                    setDraft({
+                      ...draft,
+                      ADIB_GOLD_DEBIT: { ...draft.ADIB_GOLD_DEBIT, enabled: checked },
+                    })
+                  }
+                  aria-label="Include ADIB Gold Signature Debit"
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                A debit card with no cashback or points on spend, so it won&apos;t win a &ldquo;best for earning&rdquo;
+                comparison. Keep it on to see its lifestyle perks (airport lounges, 25% dining, golf, valet) surfaced in
+                your results.
               </p>
             </CardContent>
           </Card>

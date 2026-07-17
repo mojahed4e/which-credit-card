@@ -14,11 +14,11 @@ it.
 | [`lib/cards.ts`](../lib/cards.ts) | Reward calculators, `CARD_TERMS` (bank, fees, min salary, monthly caps, key terms, redemption guides, `lastVerified`), `CARD_NAMES` |
 | [`lib/categories.ts`](../lib/categories.ts) | Purchase categories, search keywords, MCC reality-check quirks |
 | [`lib/perks.ts`](../lib/perks.ts) | `CARD_PERKS` catalog, `CARD_NETWORK_TIER`, perk taxonomy + relevance map, `PERKS_VERIFIED_ON` |
-| [`test/cards.test.ts`](../test/cards.test.ts) | 42 fuzz fixtures that pin every calculator path — run after any rate change |
+| [`test/cards.test.ts`](../test/cards.test.ts) | 52 fuzz fixtures that pin every calculator path — run after any rate change |
 
 ## Where the numbers come from
 
-For each of the 8 cards we cross-reference **at least two** of:
+For each of the 9 cards we cross-reference **at least two** of:
 
 1. **The bank's official product page** (the `productUrl` in `CARD_TERMS`).
 2. **The official Terms & Conditions / Key Fact Statement PDF** (the `tncUrl`).

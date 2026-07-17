@@ -210,25 +210,25 @@ const fixtures: Fixture[] = [
     expectRates: { FAB_TRAVEL: 0 },
   },
   {
-    name: "FAB Travel: flight at conservative 0.005 AED/pt → 6%",
-    purchase: { amountAED: 1000, location: "international", channel: "online", category: "travel_air" },
-    settings: settingsWith("FAB_TRAVEL", { fabRewardValuePerPointAED: 0.005 }),
-    expectRates: { FAB_TRAVEL: 0.06 },
-  },
-  {
-    name: "FAB Travel: flight at aggressive 0.02 AED/pt (airline xfer) → 24%",
+    name: "FAB Travel: travel rate is a fixed 12%, independent of the redemption setting",
     purchase: { amountAED: 1000, location: "international", channel: "online", category: "travel_air" },
     settings: settingsWith("FAB_TRAVEL", { fabRewardValuePerPointAED: 0.02 }),
-    expectRates: { FAB_TRAVEL: 0.24 },
+    expectRates: { FAB_TRAVEL: 0.12 },
   },
   {
-    name: "FAB Travel: everyday spend → 1 pt × 0.01 = 1%",
+    name: "FAB Travel: everyday spend → 1 pt × 0.00303 = 0.303%",
     purchase: { amountAED: 500, location: "domestic", channel: "pos", category: "instore_shopping" },
-    expectRates: { FAB_TRAVEL: 0.01 },
+    expectRates: { FAB_TRAVEL: 0.00303 },
   },
   {
-    name: "FAB Travel: international everyday spend (no FX fee marketed) → still 1%",
+    name: "FAB Travel: international everyday spend (no FX fee marketed) → still 0.303%",
     purchase: { amountAED: 500, location: "international", channel: "pos", category: "dining" },
+    expectRates: { FAB_TRAVEL: 0.00303 },
+  },
+  {
+    name: "FAB Travel: everyday base earn scales with the redemption setting (0.01 → 1%)",
+    purchase: { amountAED: 500, location: "domestic", channel: "pos", category: "instore_shopping" },
+    settings: settingsWith("FAB_TRAVEL", { fabRewardValuePerPointAED: 0.01 }),
     expectRates: { FAB_TRAVEL: 0.01 },
   },
 
@@ -257,6 +257,79 @@ const fixtures: Fixture[] = [
     name: "Dubai First: utilities → 0.5% (other)",
     purchase: { amountAED: 300, location: "domestic", channel: "online", category: "utilities" },
     expectRates: { DUBAI_FIRST_CASHBACK: 0.005 },
+  },
+
+  // ─── Emirates NBD Darna Signature ─────────────────────────────────────────
+  {
+    name: "Darna Signature: Aldar destination retail → 7.5% (0.75 pts × 0.1)",
+    purchase: { amountAED: 1000, location: "domestic", channel: "pos", category: "instore_shopping", atAldar: true },
+    expectRates: { ENBD_DARNA_SIGNATURE: 0.075 },
+    expectBest: "ENBD_DARNA_SIGNATURE",
+  },
+  {
+    name: "Darna Signature: general non-Aldar retail → 1% (0.1 pts × 0.1)",
+    purchase: { amountAED: 500, location: "domestic", channel: "pos", category: "instore_shopping" },
+    expectRates: { ENBD_DARNA_SIGNATURE: 0.01 },
+  },
+  {
+    name: "Darna Signature: international general spend → still 1%",
+    purchase: { amountAED: 500, location: "international", channel: "pos", category: "instore_shopping" },
+    expectRates: { ENBD_DARNA_SIGNATURE: 0.01 },
+  },
+  {
+    name: "Darna Signature: non-Aldar grocery → 0.25% (supermarket tier)",
+    purchase: { amountAED: 400, location: "domestic", channel: "pos", category: "grocery" },
+    expectRates: { ENBD_DARNA_SIGNATURE: 0.0025 },
+  },
+  {
+    name: "Darna Signature: fuel → 0.1% (suppressed tier)",
+    purchase: { amountAED: 200, location: "domestic", channel: "pos", category: "fuel" },
+    expectRates: { ENBD_DARNA_SIGNATURE: 0.001 },
+  },
+  {
+    name: "Darna Signature: utilities → 0.1% (suppressed tier)",
+    purchase: { amountAED: 300, location: "domestic", channel: "online", category: "utilities" },
+    expectRates: { ENBD_DARNA_SIGNATURE: 0.001 },
+  },
+  {
+    name: "Darna Signature: education is excluded from Aldar rate → 0.1% even atAldar",
+    purchase: { amountAED: 5000, location: "domestic", channel: "pos", category: "education", atAldar: true },
+    expectRates: { ENBD_DARNA_SIGNATURE: 0.001 },
+  },
+  {
+    name: "Darna Signature: atAldar ignored for international spend → general 1%",
+    purchase: { amountAED: 500, location: "international", channel: "pos", category: "instore_shopping", atAldar: true },
+    expectRates: { ENBD_DARNA_SIGNATURE: 0.01 },
+  },
+  {
+    name: "Darna Signature: custom point value 0.15 lifts Aldar retail to 11.25%",
+    purchase: { amountAED: 1000, location: "domestic", channel: "pos", category: "instore_shopping", atAldar: true },
+    settings: settingsWith("ENBD_DARNA_SIGNATURE", { darnaValuePerPointAED: 0.15 }),
+    expectRates: { ENBD_DARNA_SIGNATURE: 0.1125 },
+  },
+  {
+    name: "Darna Signature: disabled → 0%",
+    purchase: { amountAED: 1000, location: "domestic", channel: "pos", category: "instore_shopping", atAldar: true },
+    settings: settingsWith("ENBD_DARNA_SIGNATURE", { enabled: false }),
+    expectRates: { ENBD_DARNA_SIGNATURE: 0 },
+  },
+
+  // ─── ADIB Gold Signature Debit (perks-only; earns 0% on all spend) ────────
+  {
+    name: "ADIB Gold Debit: everyday spend earns nothing → 0%",
+    purchase: { amountAED: 500, location: "domestic", channel: "pos", category: "instore_shopping" },
+    expectRates: { ADIB_GOLD_DEBIT: 0 },
+  },
+  {
+    name: "ADIB Gold Debit: travel (a perk-relevant category) still earns nothing → 0%",
+    purchase: { amountAED: 3000, location: "international", channel: "online", category: "travel_air" },
+    expectRates: { ADIB_GOLD_DEBIT: 0 },
+  },
+  {
+    name: "ADIB Gold Debit: disabled → 0%",
+    purchase: { amountAED: 500, location: "domestic", channel: "pos", category: "dining" },
+    settings: settingsWith("ADIB_GOLD_DEBIT", { enabled: false }),
+    expectRates: { ADIB_GOLD_DEBIT: 0 },
   },
 
   // ─── Recommendation outcome sanity checks ────────────────────────────────

@@ -12,7 +12,7 @@
 
 export const meta = {
   name: 'uae-card-perks-research',
-  description: 'Research + verify non-reward cardholder perks (valet, lounge, car-rental/flight/hotel discounts) for the 8 UAE cards, then synthesize a taxonomy + purchase-context relevance map',
+  description: 'Research + verify non-reward cardholder perks (valet, lounge, car-rental/flight/hotel discounts) for the 9 UAE cards, then synthesize a taxonomy + purchase-context relevance map',
   phases: [
     { title: 'Research', detail: 'one agent per card — bank + network-tier benefits' },
     { title: 'Verify', detail: 'adversarially check valet/location + named-partner discount claims' },
@@ -92,6 +92,8 @@ const CARDS = [
   { cardId: 'CITI_PREMIER', cardName: 'Citi Premier', bank: 'Citibank', url: 'https://www.citibank.ae/credit-cards/rewards/citi-premier-credit-card' },
   { cardId: 'FAB_TRAVEL', cardName: 'FAB Travel', bank: 'First Abu Dhabi Bank', url: 'https://www.bankfab.com/en-ae/personal/credit-cards/fab-travel-credit-card' },
   { cardId: 'DUBAI_FIRST_CASHBACK', cardName: 'Dubai First Cashback', bank: 'Dubai First', url: 'https://www.dubaifirst.com/en-ae/cashback-credit-card' },
+  { cardId: 'ENBD_DARNA_SIGNATURE', cardName: 'Emirates NBD Darna Signature', bank: 'Emirates NBD', url: 'https://www.emiratesnbd.com/en/cards/credit-cards/darna-visa-signature-credit-card' },
+  { cardId: 'ADIB_GOLD_DEBIT', cardName: 'ADIB Gold Signature Debit', bank: 'Abu Dhabi Islamic Bank', url: 'https://www.adib.ae/en/personal/priority-banking/gold/lifestyle-benefits' },
 ]
 
 const APP_CATEGORIES = 'grocery, online_grocery, dining, online_food, fuel, utilities, government, education, online_shopping, instore_shopping, travel_air, travel_hotel, other'
@@ -146,13 +148,13 @@ phase('Synthesize')
 const synthesis = await agent(
   `You are designing the data model for a UAE credit-card advisor app that wants to add a "card perks" feature ` +
     `(valet parking, lounge access, car-rental / flight / hotel discounts, etc.) on top of its existing per-transaction reward calculator.\n\n` +
-    `Here are the VERIFIED perks across 8 cards as JSON:\n${JSON.stringify(flatForSynthesis, null, 2)}\n\n` +
+    `Here are the VERIFIED perks across 9 cards as JSON:\n${JSON.stringify(flatForSynthesis, null, 2)}\n\n` +
     `Produce a structured design artifact:\n` +
     `1. taxonomy: the final list of perk categories that actually occur in the data, each with a short human label and a suggested lucide-react icon name.\n` +
     `2. relevanceMap: for each perk category, which of the app's PURCHASE categories make it worth surfacing in the results screen. The app's purchase categories are exactly: ${APP_CATEGORIES}. (e.g. car_rental + flight_discount + hotel_discount + airport_lounge + travel_insurance are relevant to travel_air / travel_hotel; valet_parking + cinema + dining_offer relevant to instore_shopping / dining.)\n` +
     `3. networkVsBank: a short note on which perk categories tend to be network-tier (Visa Infinite / Mastercard World Elite) vs genuinely bank-specific, and the design implication (perks may need to attach to a card's network tier, not just the card).\n` +
     `4. dataQuality: which specific claims were weak/unverified and should be marked low-confidence or omitted in the app.\n` +
-    `5. topPerksPerCard: a compact one-line headline of the single most compelling perk for each of the 8 cards (or "none notable").`,
+    `5. topPerksPerCard: a compact one-line headline of the single most compelling perk for each of the 9 cards (or "none notable").`,
   {
     label: 'synthesize:design',
     phase: 'Synthesize',

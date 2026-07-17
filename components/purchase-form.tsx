@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -55,6 +56,7 @@ export function PurchaseForm({ onSubmit }: PurchaseFormProps) {
   const [location, setLocation] = useState<Location>("domestic")
   const [channel, setChannel] = useState<Channel>("pos")
   const [category, setCategory] = useState<PurchaseCategory>("grocery")
+  const [atAldar, setAtAldar] = useState(false)
   const [error, setError] = useState("")
 
   const [channelTouched, setChannelTouched] = useState(false)
@@ -71,6 +73,7 @@ export function PurchaseForm({ onSubmit }: PurchaseFormProps) {
         if (parsed.location) setLocation(parsed.location)
         if (parsed.channel) setChannel(parsed.channel)
         if (parsed.category) setCategory(parsed.category)
+        if (typeof parsed.atAldar === "boolean") setAtAldar(parsed.atAldar)
         setChannelTouched(true)
         setLocationTouched(true)
       }
@@ -81,11 +84,11 @@ export function PurchaseForm({ onSubmit }: PurchaseFormProps) {
 
   useEffect(() => {
     try {
-      localStorage.setItem(LAST_INPUT_KEY, JSON.stringify({ amount, location, channel, category }))
+      localStorage.setItem(LAST_INPUT_KEY, JSON.stringify({ amount, location, channel, category, atAldar }))
     } catch {
       // Ignore storage errors
     }
-  }, [amount, location, channel, category])
+  }, [amount, location, channel, category, atAldar])
 
   const handleCategoryChange = (nextCategory: PurchaseCategory) => {
     setCategory(nextCategory)
@@ -170,6 +173,9 @@ export function PurchaseForm({ onSubmit }: PurchaseFormProps) {
       location,
       channel,
       category,
+      // Aldar destinations are all inside the UAE — ignore the toggle for
+      // foreign-currency purchases.
+      atAldar: location === "domestic" && atAldar,
     })
   }
 
@@ -239,6 +245,23 @@ export function PurchaseForm({ onSubmit }: PurchaseFormProps) {
                 </Label>
               </div>
             </RadioGroup>
+
+            {location === "domestic" && (
+              <div className="flex items-start space-x-2 pt-1">
+                <Checkbox
+                  id="at-aldar"
+                  checked={atAldar}
+                  onCheckedChange={(checked) => setAtAldar(checked === true)}
+                />
+                <Label htmlFor="at-aldar" className="text-sm font-normal cursor-pointer leading-relaxed">
+                  At an Aldar destination (Yas Mall, Al Jimi Mall, Ferrari World / Warner Bros / Yas Waterworld,
+                  Aldar hotels &amp; beach clubs…)
+                  <span className="block text-muted-foreground text-xs mt-1">
+                    The Emirates NBD Darna Signature card earns its top rate only at Aldar/Miral venues.
+                  </span>
+                </Label>
+              </div>
+            )}
           </div>
 
           {/* Channel */}

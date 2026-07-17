@@ -9,6 +9,8 @@ export type CardId =
   | "CITI_PREMIER"
   | "FAB_TRAVEL"
   | "DUBAI_FIRST_CASHBACK"
+  | "ENBD_DARNA_SIGNATURE"
+  | "ADIB_GOLD_DEBIT"
 
 export type Location = "domestic" | "international"
 export type Channel = "pos" | "online" | "wallet"
@@ -32,6 +34,13 @@ export interface PurchaseInput {
   location: Location
   channel: Channel
   category: PurchaseCategory
+  /**
+   * Purchase is at an Aldar destination (Yas Mall, Al Jimi Mall, WTC Abu Dhabi,
+   * Ferrari World / Warner Bros / Yas Waterworld, Aldar hotels & beach clubs…).
+   * Drives the ENBD Darna cards' accelerated Aldar earn. Optional so stored
+   * inputs from before this field existed keep working (treated as false).
+   */
+  atAldar?: boolean
 }
 
 export type AjmanCategory = "fuel" | "supermarket" | "online" | "school"
@@ -68,12 +77,23 @@ export interface CitiSettings extends BasePerCardSettings {
 
 export interface FabTravelSettings extends BasePerCardSettings {
   minSpendMet: boolean // AED 5,000 per month required for the 12% travel cashback
-  fabRewardValuePerPointAED: number // default 0.01 — FAB Rewards points typical redemption value
+  fabRewardValuePerPointAED: number // default 0.00303 — standard FAB Rewards redemption value; applies to base/everyday earn only (travel is a fixed 12%)
 }
 
 export interface DubaiFirstSettings extends BasePerCardSettings {
   // No minimum spend; only minimum salary on issuance. Keeping a toggle in case
   // the user wants to suppress the card without disabling it entirely later.
+}
+
+export interface DarnaSettings extends BasePerCardSettings {
+  // 10 Darna Points = AED 1 when redeemed at Aldar POS / via the Darna app,
+  // so the bank-stated value is 0.1 AED/pt. Editable in case redemption terms change.
+  darnaValuePerPointAED: number
+}
+
+export interface AdibGoldSettings extends BasePerCardSettings {
+  // Debit card — earns no cashback or points on spend, so there are no tunable
+  // reward params. Its value is in lifestyle perks; only the enable toggle applies.
 }
 
 export interface CardSettings {
@@ -85,6 +105,8 @@ export interface CardSettings {
   CITI_PREMIER: CitiSettings
   FAB_TRAVEL: FabTravelSettings
   DUBAI_FIRST_CASHBACK: DubaiFirstSettings
+  ENBD_DARNA_SIGNATURE: DarnaSettings
+  ADIB_GOLD_DEBIT: AdibGoldSettings
 }
 
 export interface CardResult {
@@ -111,6 +133,8 @@ export const CARD_NAMES: Record<CardId, string> = {
   CITI_PREMIER: "Citi Premier",
   FAB_TRAVEL: "FAB Travel",
   DUBAI_FIRST_CASHBACK: "Dubai First Cashback",
+  ENBD_DARNA_SIGNATURE: "Emirates NBD Darna Signature",
+  ADIB_GOLD_DEBIT: "ADIB Gold Signature Debit",
 }
 
 export interface CardTermsInfo {
@@ -276,18 +300,18 @@ export const CARD_TERMS: Record<CardId, CardTermsInfo> = {
     minMonthlySalaryAED: 20000,
     rewardCurrency: "FAB Rewards",
     keyTerms: [
-      "12 FAB Rewards / AED on flights & hotels (bank headline: 12% at default redemption).",
+      "12% back in FAB Rewards on flights & hotels — fixed at the bank's standard redemption (~0.00303 AED/pt).",
       "Cap AED 1,800/mo on the travel rewards. Requires AED 5,000 monthly spend.",
-      "Realised AED value depends on how you redeem points — adjust the rate in settings.",
+      "Everyday base-earn value depends on how you redeem points — adjust the rate in settings (travel stays 12%).",
       "Zero international transaction fee + free flight welcome offer.",
-      "Base FAB Rewards earn on everyday spend — rate not publicly disclosed; estimated ~1 pt/AED.",
+      "Base FAB Rewards earn on everyday spend — not publicly disclosed; ~1 pt/AED (≈0.3% at the 0.00303 default).",
       "14 free airport lounge visits/yr + 4 free Careem airport transfers/yr.",
     ],
     monthlyCapAED: 1800,
     monthlyCapNote: "AED 1,800/mo cap on the 12% travel category",
     redemptionGuide: [
-      "Default in this app: ~0.01 AED per FAB Reward point — adjust in settings if your typical redemption differs.",
-      "Statement credit / cashback: typically the lowest ratio, often ~0.005–0.01 AED/pt.",
+      "Default in this app: ~0.00303 AED per FAB Reward point — adjust in settings if your typical redemption differs.",
+      "Statement credit / cashback: typically the lowest ratio, often ~0.001–0.003 AED/pt.",
       "Transfer to airline loyalty (Etihad Guest, Skywards on partner offers): can reach ~0.02 AED/pt on smart redemptions.",
       "FAB Rewards portal travel & shopping vouchers: middle of the road — check ratios before redeeming.",
     ],
@@ -311,6 +335,52 @@ export const CARD_TERMS: Record<CardId, CardTermsInfo> = {
     monthlyCapAED: 150,
     monthlyCapNote: "AED 150/mo cap per 5% category (supermarket, dining, fuel each)",
     lastVerified: "2026-05-24",
+  },
+  ENBD_DARNA_SIGNATURE: {
+    bank: "Emirates NBD",
+    productUrl: "https://www.emiratesnbd.com/en/cards/credit-cards/darna-visa-signature-credit-card",
+    tncUrl: "https://www.emiratesnbd.com/-/media/enbd/files/cards/darna_visa_credit_card_tncs.pdf",
+    annualFeeAED: 315,
+    annualFeeNote: "AED 315 (AED 300 + VAT); 'free for life' promo advertised at launch for a limited time",
+    minMonthlySalaryAED: 12000,
+    rewardCurrency: "Darna Points",
+    keyTerms: [
+      "7.5% back as Darna Points at Aldar destinations: Yas Mall, Al Jimi Mall, WTC & Al Hamra malls, Aldar hotels & beach clubs, Miral theme parks (Ferrari World, Warner Bros, Yas Waterworld), golf courses.",
+      "1% at everything non-Aldar (domestic, international and EU/UK alike).",
+      "Only 0.25% at non-Aldar supermarkets, fast-food, insurance & car dealerships.",
+      "Only 0.1% on petroleum, transit, government, utilities, real estate, education & telecom — Aldar property & school fees are excluded from the 7.5% tier too.",
+      "Monthly earn cap: 50,000 Darna Points (≈ AED 5,000 value).",
+      "Utility bills paid via ENBD online banking, exchange-house and installment-converted transactions earn nothing.",
+      "Lifestyle perks (lounge, Vox B1G1, concierge, roadside) need AED 5,000 spend in the month you use them.",
+    ],
+    monthlyCapAED: 5000,
+    monthlyCapNote: "50,000 Darna Points/mo total earn cap (≈ AED 5,000 at 10 pts = AED 1)",
+    redemptionGuide: [
+      "10 Darna Points = AED 1 when redeemed with the card at Aldar POS terminals or via the Darna app (0.1 AED/pt — the default in settings).",
+      "Redeem instantly at 1,200+ Aldar merchants: pick 'Darna Points' instead of 'ENBD VISA' at the till, or split the payment in two.",
+      "Darna app also offers gift cards, services and cashback conversions — check ratios before redeeming.",
+      "Points transferred to your Darna wallet expire 2 years from issue.",
+    ],
+    lastVerified: "2026-07-17",
+  },
+  ADIB_GOLD_DEBIT: {
+    bank: "Abu Dhabi Islamic Bank (ADIB)",
+    productUrl: "https://www.adib.ae/en/personal/priority-banking/gold/lifestyle-benefits",
+    tncUrl: "https://www.adib.ae/en/personal/priority-banking/gold/lifestyle-benefits",
+    annualFeeAED: null,
+    annualFeeNote: "No card fee — issued with an ADIB Gold priority-banking relationship",
+    minMonthlySalaryAED: 40000,
+    rewardCurrency: "None — lifestyle perks only",
+    keyTerms: [
+      "Debit card: earns no cashback or points on spend — its value is in lifestyle perks, not an earn rate.",
+      "Unlimited airport lounge access via LoungeKey / Visa Airport Companion (900+ lounges), cardholder only (no guests).",
+      "25% discount at fine-dining restaurants in the UAE (show the card).",
+      "2 complimentary golf rounds per month at select courses, plus golf-shop and F&B discounts.",
+      "Free valet parking at select ADIB branches; 24/7 Visa Concierge; health-club access; reserved safe-deposit locker.",
+      "Priority-banking eligibility: AED 250,000 deposits/investments, OR AED 40,000+ monthly salary, OR AED 1,250,000+ home finance.",
+    ],
+    monthlyCapAED: null,
+    lastVerified: "2026-07-17",
   },
 }
 
@@ -360,9 +430,16 @@ export const DEFAULT_SETTINGS: CardSettings = {
   FAB_TRAVEL: {
     enabled: true,
     minSpendMet: true,
-    fabRewardValuePerPointAED: 0.01,
+    fabRewardValuePerPointAED: 0.00303,
   },
   DUBAI_FIRST_CASHBACK: {
+    enabled: true,
+  },
+  ENBD_DARNA_SIGNATURE: {
+    enabled: true,
+    darnaValuePerPointAED: 0.1, // bank-stated: 10 Darna Points = AED 1
+  },
+  ADIB_GOLD_DEBIT: {
     enabled: true,
   },
 }
@@ -383,8 +460,10 @@ function deriveFlags(p: PurchaseInput) {
   const isTravelHotel = p.category === "travel_hotel"
   const isGeneralRetail =
     p.category === "online_shopping" || p.category === "instore_shopping" || p.category === "other"
+  const isAldar = p.atAldar === true && p.location === "domestic"
 
   return {
+    isAldar,
     isDomestic,
     isInternational,
     isOnline,
@@ -757,16 +836,13 @@ function calcFabTravel(p: PurchaseInput, settings: FabTravelSettings): CardResul
   }
 
   // The bank markets "12% cashback in FAB Rewards on flight & hotel bookings,
-  // capped at AED 1,800/month, with AED 5,000 minimum monthly spend". The
-  // headline 12% is the AED-equivalent at the standard portal redemption
-  // (~0.01 AED per FAB Reward point), i.e. 12 points per AED on travel.
-  //
-  // We model it explicitly as points so the user's redemption-rate setting
-  // determines the *realised* AED value. If they redeem at 0.01 AED/pt they
-  // get the bank's headline 12%. If they expect 0.005 AED/pt (closer to
-  // statement-credit reality), they get 6%. If they hit airline-transfer
-  // sweet spots at 0.02 AED/pt, they get 24%.
-  const valuePerPoint = settings.fabRewardValuePerPointAED
+  // capped at AED 1,800/month, with AED 5,000 minimum monthly spend". That 12%
+  // is the AED-equivalent the bank guarantees at its standard FAB Rewards
+  // redemption (~0.00303 AED/pt), so we treat the travel rate as a FIXED 12% —
+  // independent of the user's redemption setting. That setting only changes the
+  // *base/everyday* realised value below, not the marketed travel headline.
+  const FAB_TRAVEL_RATE = 0.12
+  const FAB_STANDARD_REDEMPTION = 0.00303 // AED per FAB Reward at the bank's standard rate
 
   if (flags.isTravelAir || flags.isTravelHotel) {
     if (!settings.minSpendMet) {
@@ -780,23 +856,23 @@ function calcFabTravel(p: PurchaseInput, settings: FabTravelSettings): CardResul
         note: "12% on flights/hotels requires AED 5,000 monthly spend (toggle off).",
       }
     }
-    const pointsPerAED = 12 // bank's effective earn rate on the travel category
-    const points = p.amountAED * pointsPerAED
-    const valueAED = points * valuePerPoint
-    const effectiveRate = p.amountAED > 0 ? valueAED / p.amountAED : 0
+    const valueAED = p.amountAED * FAB_TRAVEL_RATE
+    const points = valueAED / FAB_STANDARD_REDEMPTION // FAB Rewards awarded (~40/AED)
     return {
       cardId: "FAB_TRAVEL",
       cardName: CARD_NAMES.FAB_TRAVEL,
       rewardType: "points",
       rewardValueAED: valueAED,
       rawPoints: points,
-      effectiveRate,
-      note: `12 FAB Rewards/AED on flights & hotels — cap AED 1,800/mo (not tracked). Realised value depends on redemption ratio (settings).`,
+      effectiveRate: FAB_TRAVEL_RATE,
+      note: `12% back in FAB Rewards on flights & hotels — cap AED 1,800/mo (not tracked). Fixed at the bank's standard redemption; airline transfers can beat it.`,
     }
   }
 
-  // Base FAB Rewards earn — not publicly disclosed; use a conservative ~1 pt/AED.
-  // Zero FX fee marketed, so we treat international the same as domestic for the estimate.
+  // Base FAB Rewards earn on everyday spend — not publicly disclosed; ~1 pt/AED.
+  // Unlike travel, this realises at the user's redemption setting (default
+  // 0.00303 AED/pt → ~0.3%). Zero FX fee marketed, so international == domestic here.
+  const valuePerPoint = settings.fabRewardValuePerPointAED
   const pointsPerAED = 1
   const points = p.amountAED * pointsPerAED
   const valueAED = points * valuePerPoint
@@ -858,6 +934,115 @@ function calcDubaiFirstCashback(p: PurchaseInput, settings: DubaiFirstSettings):
   }
 }
 
+// Emirates NBD Darna Signature (Aldar co-brand). Earn is in Darna Points; the
+// bank's headline %s assume the fixed POS redemption of 10 pts = AED 1. Rates are
+// pts per AED, taken from the official T&Cs table 1.1 (Signature column).
+const DARNA_SIGNATURE_RATES = {
+  /** Aldar destinations — 7.5% headline */
+  aldar: 0.75,
+  /** general non-Aldar spend, domestic & international & EU alike — 1% */
+  general: 0.1,
+  /** non-Aldar supermarkets, fast-food, insurance, car dealerships — 0.25% */
+  grocery: 0.025,
+  /** petroleum, transit, government, utilities, real estate, education, telecom — 0.1% */
+  low: 0.01,
+}
+
+function calcDarna(p: PurchaseInput, settings: DarnaSettings): CardResult {
+  const cardId: CardId = "ENBD_DARNA_SIGNATURE"
+  const flags = deriveFlags(p)
+
+  if (!settings.enabled) {
+    return {
+      cardId,
+      cardName: CARD_NAMES[cardId],
+      rewardType: "points",
+      rewardValueAED: 0,
+      rawPoints: 0,
+      effectiveRate: 0,
+      note: "Card disabled.",
+    }
+  }
+
+  const rates = DARNA_SIGNATURE_RATES
+  const valuePerPoint = settings.darnaValuePerPointAED
+
+  // The low tier applies even at Aldar venues: Aldar property & education
+  // payments are explicitly excluded from the accelerated Aldar earn.
+  const isLowTier = flags.isFuel || flags.isUtilities || flags.isGovernment || flags.isEducation
+
+  let pointsPerAED: number
+  let categoryNote: string
+
+  if (isLowTier) {
+    pointsPerAED = rates.low
+    categoryNote = "suppressed tier (fuel/transit/government/utilities/real estate/education/telecom)"
+  } else if (flags.isAldar) {
+    pointsPerAED = rates.aldar
+    categoryNote = "Aldar destination rate"
+  } else if (flags.isGrocery) {
+    pointsPerAED = rates.grocery
+    categoryNote = "non-Aldar supermarket tier"
+  } else {
+    pointsPerAED = rates.general
+    categoryNote = "general non-Aldar rate"
+  }
+
+  const points = p.amountAED * pointsPerAED
+  const valueAED = points * valuePerPoint
+  const effectiveRate = p.amountAED > 0 ? valueAED / p.amountAED : 0
+
+  const warnings: string[] = []
+  if (isLowTier && p.atAldar) {
+    warnings.push("Aldar property & school fees are excluded from the accelerated Aldar earn.")
+  }
+  if (flags.isUtilities || flags.isGovernment) {
+    warnings.push("Bills paid via ENBD online banking earn ZERO Darna Points — pay via the provider's channel instead.")
+  }
+  if (flags.isDining && !flags.isAldar) {
+    warnings.push(
+      "Fast-food restaurants earn only the 0.25% supermarket tier — we model regular dining at the general rate.",
+    )
+  }
+  const warningText = warnings.length > 0 ? ` ⚠ ${warnings.join(" ")}` : ""
+
+  return {
+    cardId,
+    cardName: CARD_NAMES[cardId],
+    rewardType: "points",
+    rewardValueAED: valueAED,
+    rawPoints: points,
+    effectiveRate,
+    note: `${categoryNote}; ${points.toFixed(0)} Darna Points (~AED ${valueAED.toFixed(2)} at 10 pts = AED 1). Monthly earn cap not tracked.${warningText}`,
+  }
+}
+
+// ADIB Gold Visa Signature is a DEBIT card: it earns no cashback or points on
+// spend. Its value is entirely in lifestyle perks (airport lounges, 25% dining,
+// golf, valet, concierge), surfaced via the perks system — so the earn rate on
+// any purchase is 0% and it never tops the "best for earning" ranking.
+function calcAdibGoldDebit(_p: PurchaseInput, settings: AdibGoldSettings): CardResult {
+  if (!settings.enabled) {
+    return {
+      cardId: "ADIB_GOLD_DEBIT",
+      cardName: CARD_NAMES.ADIB_GOLD_DEBIT,
+      rewardType: "cashback",
+      rewardValueAED: 0,
+      effectiveRate: 0,
+      note: "Card disabled.",
+    }
+  }
+
+  return {
+    cardId: "ADIB_GOLD_DEBIT",
+    cardName: CARD_NAMES.ADIB_GOLD_DEBIT,
+    rewardType: "cashback",
+    rewardValueAED: 0,
+    effectiveRate: 0,
+    note: "Debit card — no cashback or points on spend. Value is in lifestyle perks (lounge, 25% dining, golf, valet).",
+  }
+}
+
 export function computeBestCard(purchase: PurchaseInput, settings: CardSettings): ComputeResult {
   if (purchase.amountAED <= 0) {
     return { bestCard: null, results: [] }
@@ -873,6 +1058,8 @@ export function computeBestCard(purchase: PurchaseInput, settings: CardSettings)
   results.push(calcCitiPremier(purchase, settings.CITI_PREMIER))
   results.push(calcFabTravel(purchase, settings.FAB_TRAVEL))
   results.push(calcDubaiFirstCashback(purchase, settings.DUBAI_FIRST_CASHBACK))
+  results.push(calcDarna(purchase, settings.ENBD_DARNA_SIGNATURE))
+  results.push(calcAdibGoldDebit(purchase, settings.ADIB_GOLD_DEBIT))
 
   results.sort((a, b) => b.effectiveRate - a.effectiveRate)
 
