@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { PurchaseForm } from "@/components/purchase-form"
 import { ResultsDisplay } from "@/components/results-display"
+import { WalletGuide } from "@/components/wallet-guide"
 import { CardSettingsPanel } from "@/components/card-settings-panel"
 import { ConsentBanner, ConsentSettingsButton } from "@/components/consent-banner"
 import { HowWeCalculateModal } from "@/components/how-we-calculate-modal"
@@ -62,6 +63,16 @@ export default function Home() {
     void logCardRequest(purchase, computed, settings)
   }
 
+  const handleScenarioPick = (input: Omit<PurchaseInput, "amountAED">) => {
+    // Reuse the last entered amount so the AED figures stay meaningful;
+    // fall back to a representative AED 200 before the first calculation.
+    const amountAED = lastPurchase && lastPurchase.amountAED > 0 ? lastPurchase.amountAED : 200
+    handlePurchaseSubmit({ amountAED, ...input })
+    setTimeout(() => {
+      document.getElementById("results")?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, 80)
+  }
+
   return (
     <main className="min-h-screen bg-background pwa-safe-bottom">
       <header className="bg-brand-header text-brand-header-foreground pwa-safe-top">
@@ -97,8 +108,13 @@ export default function Home() {
 
         {/* Results */}
         {result && lastPurchase && (
-          <ResultsDisplay result={result} category={lastPurchase.category} enabledCardIds={enabledCardIds} />
+          <div id="results" className="scroll-mt-4">
+            <ResultsDisplay result={result} category={lastPurchase.category} enabledCardIds={enabledCardIds} />
+          </div>
         )}
+
+        {/* Best card per spend type, always visible */}
+        <WalletGuide settings={settings} onPick={handleScenarioPick} />
 
         {/* Disclaimer text below results */}
         <p className="mt-6 text-xs text-muted-foreground text-center leading-relaxed">
